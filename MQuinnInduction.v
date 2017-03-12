@@ -243,3 +243,25 @@ Proof.
   - reflexivity.
   - simpl. rewrite mult_plus_distr_r. rewrite IHn'. reflexivity. Qed.
 
+Theorem beq_nat_refl : forall n : nat,
+  true = beq_nat n n.
+Proof.
+  intros n. induction n as [| n' IHn' ].
+  - reflexivity.
+  - simpl. rewrite IHn'. reflexivity. Qed.
+
+Theorem plus_swap' : forall n m p : nat,
+  n + (m + p) = m + (n + p).
+Proof.
+  intros n m p. rewrite plus_comm. rewrite <- plus_assoc.
+  replace (p + n) with (n + p). reflexivity.
+  rewrite plus_comm. reflexivity. Qed.
+
+Theorem bin_to_nat_pres_incr : forall b : bin,
+  bin_to_nat (bin_incr b) = S (bin_to_nat b).
+Proof.
+  intros b. destruct b.
+  - reflexivity.
+  - reflexivity.
+  - reflexivity. Qed.
+
