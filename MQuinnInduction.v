@@ -329,3 +329,58 @@ same number we started with.
 Fixpoint normalize (b:bin) : bin := 
   match b with
   | Z => Z
+  | I b' => I (normalize b')
+  | D b' => match (bin_to_nat b') with
+            | O => Z
+            | S _ => D (normalize b')
+            end
+  end.
+Example test_normalize1: normalize (D Z) = Z.
+Proof. simpl. reflexivity. Qed.
+Example test_normalize2: normalize (D (D Z)) = Z.
+Proof. simpl. reflexivity. Qed.
+Example test_normalize3: normalize (D (D (D Z))) = Z.
+Proof. simpl. reflexivity. Qed.
+Example test_normalize4: normalize (I (D (D (D Z)))) = I Z.
+Proof. simpl. reflexivity. Qed.
+Example test_normalize5: normalize (D (I (D (D (D Z))))) = D (I Z).
+Proof. simpl. reflexivity. Qed.
+Example test_normalize6: normalize (I Z) = (I Z).
+Proof. simpl. reflexivity. Qed.
+
+Lemma nat_even_sum_to_bin_always_d_prefix: forall n:nat,
+  nat_to_bin ((S n) + (S n)) = D (nat_to_bin (S n)).
+Proof.
+  intros n. induction n.
+  - reflexivity.
+  - simpl. replace (n + S (S n)) with (S n + S n).
+    + rewrite IHn. simpl. reflexivity.
+    + rewrite <- plus_1_l. rewrite plus_n_Sm.
+      rewrite plus_1_l. rewrite plus_swap.
+      rewrite plus_assoc. rewrite <- plus_1_l.
+      reflexivity.
+Qed.
+
+Lemma nat_odd_sum_to_bin_always_i_prefix: forall n:nat,
+  nat_to_bin (n + n + 1) = I (nat_to_bin n).
+Proof.
+  intros n. induction n.
+  - reflexivity.
+  - simpl. replace (n + S n + 1) with (S n + n + 1).
+    + simpl. rewrite IHn. simpl. reflexivity.
+    + rewrite <- plus_assoc. rewrite plus_swap.
+      rewrite plus_assoc. reflexivity.
+Qed.
+
+Theorem normalize_eq_bin_to_nat_to_bin: forall b:bin,
+  (nat_to_bin (bin_to_nat b)) = normalize b.
+Proof.
+  intros b. induction b.
+  - reflexivity.
+  - simpl. rewrite <- plus_n_0. destruct (bin_to_nat b).
+    + reflexivity.
+    + rewrite <- IHb. rewrite nat_even_sum_to_bin_always_d_prefix.
+      reflexivity.
+  - simpl. rewrite <- plus_n_0. rewrite <- IHb.
+    rewrite nat_odd_sum_to_bin_always_i_prefix.
+    reflexivity. Qed.
