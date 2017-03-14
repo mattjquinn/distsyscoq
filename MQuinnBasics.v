@@ -457,31 +457,50 @@ Inductive bin : Type :=
   | D : bin -> bin
   | I : bin -> bin.
 
-Definition bin_incr (b : bin) : bin := I b.
+Fixpoint incr (b : bin) : bin :=
+  match b with
+  | Z => I Z
+  | D b' => I b'
+  | I b' => D (incr b')
+  end.
 
 Fixpoint bin_to_nat (b:bin) : nat :=
   match b with
   | Z => 0
   | D b' => 2 * (bin_to_nat b')
-  | I b' => 1 + (bin_to_nat b')
+  | I b' => 2 * (bin_to_nat b') + 1
   end.
 
-Example test_bin_incr1: bin_incr Z = I Z.
+Example test_incr0: incr Z = I Z.
 Proof. simpl. reflexivity. Qed.
-Example test_bin_incr2: bin_incr (D (I Z)) = I (D (I Z)).
+Example test_incr1: incr (I Z) = (D (I Z)).
 Proof. simpl. reflexivity. Qed.
-Example test_bin_incr3: bin_incr (I (D Z)) = I (I (D Z)).
+Example test_incr2: incr (D (I Z)) = (I (I Z)).
 Proof. simpl. reflexivity. Qed.
-Example test_bin_incr4: bin_incr (D Z) = I (D Z).
+Example test_incr3: incr (I (I Z)) = (D (D (I Z))).
+Proof. simpl. reflexivity. Qed.
+Example test_incr4: incr (D (D (I Z))) = (I (D (I Z))).
+Proof. simpl. reflexivity. Qed.
+Example test_incr5: incr (I (D (I Z))) = (D (I (I Z))).
+Proof. simpl. reflexivity. Qed.
+Example test_incr6: incr (D (I (I Z))) = (I (I (I Z))).
+Proof. simpl. reflexivity. Qed.
+Example test_incr7: incr (I (I (I Z))) = (D (D (D (I Z)))).
 Proof. simpl. reflexivity. Qed.
 
-Example test_bin_to_nat1: bin_to_nat Z = 0.
+Example test_bin_to_nat0: bin_to_nat Z = 0.
 Proof. simpl. reflexivity. Qed.
-Example test_bin_to_nat2: bin_to_nat (D Z) = 0.
+Example test_bin_to_nat1: bin_to_nat (I Z) = 1.
 Proof. simpl. reflexivity. Qed.
-Example test_bin_to_nat3: bin_to_nat (I (D (I (D (I Z))))) = 7.
+Example test_bin_to_nat2: bin_to_nat (D (I Z)) = 2.
 Proof. simpl. reflexivity. Qed.
-Example test_bin_to_nat4: bin_to_nat (I Z) = 1.
+Example test_bin_to_nat3: bin_to_nat (I (I Z)) = 3.
 Proof. simpl. reflexivity. Qed.
-Example test_bin_to_nat5: bin_to_nat (D (D (D (D (D (D (I Z))))))) = 64.
+Example test_bin_to_nat4: bin_to_nat (D (D (I Z))) = 4.
+Proof. simpl. reflexivity. Qed.
+Example test_bin_to_nat5: bin_to_nat (I (D (I Z))) = 5.
+Proof. simpl. reflexivity. Qed.
+Example test_bin_to_nat6: bin_to_nat (D (I (I Z))) = 6.
+Proof. simpl. reflexivity. Qed.
+Example test_bin_to_nat7: bin_to_nat (I (I (I Z))) = 7.
 Proof. simpl. reflexivity. Qed.

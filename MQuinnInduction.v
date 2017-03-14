@@ -258,10 +258,74 @@ Proof.
   rewrite plus_comm. reflexivity. Qed.
 
 Theorem bin_to_nat_pres_incr : forall b : bin,
-  bin_to_nat (bin_incr b) = S (bin_to_nat b).
+  bin_to_nat (incr b) = S (bin_to_nat b).
 Proof.
-  intros b. destruct b.
+  intros b. induction b.
   - reflexivity.
-  - reflexivity.
-  - reflexivity. Qed.
+  - simpl. rewrite <- plus_n_0. rewrite plus_n_Sm.
+    rewrite <- plus_assoc.
+    replace (bin_to_nat b + 1) with (S (bin_to_nat b)).
+    + reflexivity.
+    + rewrite <- plus_1_l. rewrite plus_comm. reflexivity.
+  - simpl. rewrite <- plus_n_0. rewrite <- plus_n_0.
+    rewrite <- plus_1_l. rewrite IHb. rewrite plus_assoc.
+    rewrite plus_assoc. replace (1 + bin_to_nat b)
+    with (S (bin_to_nat b)). rewrite <- plus_assoc.
+    replace (bin_to_nat b + 1) with (S (bin_to_nat b)).
+    + reflexivity.
+    + rewrite plus_comm. reflexivity.
+    + reflexivity.
+Qed.
 
+(* Part a. *)
+Fixpoint nat_to_bin (n:nat) : bin :=
+  match n with
+  | O => Z
+  | S n' => incr (nat_to_bin n')
+  end.
+Example test_nat_to_bin0: nat_to_bin 0 = Z.
+Proof. simpl. reflexivity. Qed.
+Example test_nat_to_bin1: nat_to_bin 1 = (I Z).
+Proof. simpl. reflexivity. Qed.
+Example test_nat_to_bin2: nat_to_bin 2 = (D (I Z)).
+Proof. simpl. reflexivity. Qed.
+Example test_nat_to_bin3: nat_to_bin 3 = (I (I Z)).
+Proof. simpl. reflexivity. Qed.
+Example test_nat_to_bin4: nat_to_bin 4 = (D (D (I Z))).
+Proof. simpl. reflexivity. Qed.
+Example test_nat_to_bin5: nat_to_bin 5 = (I (D (I Z))).
+Proof. simpl. reflexivity. Qed.
+Example test_nat_to_bin6: nat_to_bin 6 = (D (I (I Z))).
+Proof. simpl. reflexivity. Qed.
+Example test_nat_to_bin7: nat_to_bin 7 = (I (I (I Z))).
+Proof. simpl. reflexivity. Qed.
+
+Theorem nat_to_bin_to_nat_eq : forall n : nat,
+  bin_to_nat (nat_to_bin n) = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  - reflexivity.
+  - simpl. rewrite bin_to_nat_pres_incr. rewrite IHn'. reflexivity.
+Qed.
+
+(* Part b: The problem with attempting to prove:
+
+that starting with a binary number, converting to
+a natural, and then back to binary yields the
+same number we started with.
+
+  is that the definition of binary allows for infinite
+  representations of every natural number by starting with a
+  prefix of D...DZ. For instance:
+
+0: Z, DZ, DDZ, DDDZ, ...
+1: IZ, IDZ, IDDZ, IDDDZ, ...
+2: DIZ, DIDZ, DIDDZ, DIDDDZ, ...
+...
+
+*)
+
+(* Part c. *)
+Fixpoint normalize (b:bin) : bin := 
+  match b with
+  | Z => Z
