@@ -60,3 +60,70 @@ Fixpoint repeat' X x count : list X :=
 
 Check repeat'.
 Check repeat.
+
+Fixpoint repeat'' X x count : list X :=
+  match count with
+  | 0 => nil _
+  | S count' => cons _ x (repeat'' _ x count')
+  end.
+
+Definition list123 := cons nat 1 (cons nat 2 (cons nat 3 (nil nat))).
+Definition list123' := cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
+
+Arguments nil {X}.
+Arguments cons {X} _ _.
+Arguments repeat {X} x count.
+
+Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
+
+Fixpoint repeat''' {X:Type} (x:X) (count:nat) : list X :=
+  match count with
+  | O => nil
+  | S count' => cons x (repeat''' x count')
+  end.
+
+Inductive list' {X:Type} : Type :=
+  | nil' : list'
+  | cons' : X -> list' -> list'.
+
+Fixpoint app {X:Type} (l1 l2 : list X) : (list X) :=
+  match l1 with
+  | nil => l2
+  | cons h t => cons h (app t l2)
+  end.
+
+Fixpoint rev {X:Type} (l : list X) : list X :=
+  match l with
+  | nil => nil
+  | cons h t => app (rev t) (cons h nil)
+  end.
+
+Fixpoint length {X : Type} (l : list X) : nat :=
+  match l with
+  | nil => 0
+  | cons _ l' => S (length l')
+  end.
+
+Example test_rev1:
+  rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
+Proof. reflexivity. Qed.
+
+Example test_rev2:
+  rev (cons true nil) = cons true nil.
+Proof. reflexivity. Qed.
+
+Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
+Proof. reflexivity. Qed.
+
+Fail Definition mynil := nil.
+Definition mynil : list nat := nil.
+
+Check @nil.
+Definition mynil' := @nil nat.
+
+Notation "x :: y" := (cons x y) (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y []) ..).
+Notation "x ++ y" := (app x y) (at level 60, right associativity).
+
+Definition list123''' := [1; 2; 3].
