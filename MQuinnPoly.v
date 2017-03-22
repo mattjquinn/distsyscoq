@@ -312,3 +312,126 @@ Fixpoint map {X Y : Type} (f:X->Y) (l:list X) : (list Y) :=
   | h :: t => (f h) :: (map f t)
   end.
 
+Example test_map1: map (fun x => plus 3 x) [2;0;2] = [5;3;5].
+Proof. reflexivity. Qed.
+Example test_map2: map oddb [2;1;2;5] = [false;true;false;true].
+Proof. reflexivity. Qed.
+Example test_map3: map (fun n => [evenb n;oddb n]) [2;1;2;5]
+  = [[true;false];[false;true];[true;false];[false;true]].
+Proof. reflexivity. Qed.
+
+Lemma map_distr : forall (X Y : Type) (f : X -> Y) (l1 l2 : list X),
+  map f (l1 ++ l2) = (map f l1) ++ (map f l2).
+Proof.
+  intros X Y f l1 l2. induction l1.
+  - simpl. reflexivity.
+  - simpl. rewrite IHl1. reflexivity. Qed.
+
+Theorem map_rev : forall (X Y : Type) (f : X -> Y) (l : list X),
+  map f (rev l) = rev (map f l).
+Proof.
+  intros X Y f l. induction l.
+  - simpl. reflexivity.
+  - simpl. rewrite <- IHl. rewrite map_distr. simpl. reflexivity. Qed.
+
+Fixpoint flat_map {X Y : Type} (f : X -> list Y) (l : list X) : (list Y) :=
+  match l with
+  | [] => []
+  | h :: t => (f h) ++ (flat_map f t)
+  end.
+Example test_flat_map1: flat_map (fun n => [n;n;n]) [1;5;4]
+  = [1; 1; 1; 5; 5; 5; 4; 4; 4].
+Proof. reflexivity. Qed.
+
+Definition option_map {X Y : Type} (f : X -> Y) (xo : option X)
+  : option Y :=
+  match xo with
+  | None => None
+  | Some x => Some (f x)
+  end.
+
+Module ImplicitArgsPlayground.
+Fixpoint filter (X:Type) (test: X -> bool) (l : list X) : (list X) :=
+  match l with
+  | [] => []
+  | h :: t => if test h then h :: (filter X test t) else (filter X test t)
+  end.
+
+Example test_filter1 : filter nat evenb [1;2;3;4] = [2;4].
+Proof. reflexivity. Qed.
+
+Definition length_is_1 {X:Type} (l : list X): bool :=
+  beq_nat (length l) 1.
+
+Example test_filter2:
+  filter (list nat) length_is_1
+    [ [1;2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+Definition countoddmembers' (l:list nat) : nat :=
+  length (filter nat oddb l).
+Example test_countoddmembers'1: countoddmembers' [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'2: countoddmembers' [0;2;4] = 0.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'3: countoddmembers' nil = 0.
+Proof. reflexivity. Qed.
+
+Example test_anon_fun': doit3times (fun n => n * n) 2 = 256.
+Proof. reflexivity. Qed.
+
+Example test_filter2':
+  filter (list nat) (fun l => beq_nat (length l) 1)
+    [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+Definition filter_even_gt7 (l : list nat) : list nat :=
+  filter nat (fun n => andb (evenb n) (blt_nat 7 n)) l.
+
+Example test_filter_even_gt7_1 :
+  filter_even_gt7 [1;2;6;9;10;3;12;8] = [10;12;8].
+Proof. reflexivity. Qed.
+Example test_filter_even_gt7_2 :
+  filter_even_gt7 [5;2;6;19;129] = [].
+Proof. reflexivity. Qed.
+
+Definition partition {X : Type}
+                     (test: X -> bool)
+                     (l : list X) : list X * list X :=
+ (filter X test l, filter X (fun l => negb (test l)) l).
+Example test_partition1: partition oddb [1;2;3;4;5] = ([1;3;5], [2;4]).
+Proof. reflexivity. Qed.
+Example test_partition2: partition (fun x => false) [5;9;0] = ([], [5;9;0]).
+Proof. reflexivity. Qed.
+
+Fixpoint map (X Y : Type) (f:X->Y) (l:list X) : (list Y) :=
+  match l with
+  | [] => []
+  | h :: t => (f h) :: (map X Y f t)
+  end.
+
+Example test_map1: map nat nat (fun x => plus 3 x) [2;0;2] = [5;3;5].
+Proof. reflexivity. Qed.
+Example test_map2: map nat bool oddb [2;1;2;5] = [false;true;false;true].
+Proof. reflexivity. Qed.
+Example test_map3: map nat (list bool) (fun n => [evenb n;oddb n]) 
+  [2;1;2;5] = [[true;false];[false;true];[true;false];[false;true]].
+Proof. reflexivity. Qed.
+
+End ImplicitArgsPlayground.
+
+Fixpoint fold {X Y : Type} (f : X -> Y -> Y) (l : list X) (b : Y) : Y :=
+  match l with
+  | nil => b
+  | h :: t => f h (fold f t b)
+  end.
+
+Check (fold andb).
+Example fold_example1 : fold mult [1;2;3;4] 1 = 24.
+Proof. reflexivity. Qed.
+Example fold_example2 : fold andb [true;true;false;true] true = false.
+Proof. reflexivity. Qed.
+Example fold_example3 : fold app [[1]; []; [2;3]; [4]] [] = [1;2;3;4].
+Proof. reflexivity. Qed.
