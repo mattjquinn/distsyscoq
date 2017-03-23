@@ -503,3 +503,21 @@ Proof.
   - simpl. unfold fold_length. simpl.
     rewrite <- IHl. unfold fold_length. reflexivity.
 Qed.
+
+Definition fold_map {X Y : Type} (f : X -> Y) (l : list X) : list Y :=
+  fold (fun x l_of_y => (f x) :: l_of_y) l [].
+Example test_fold_map1: fold_map (fun x => plus 3 x) [2;0;2] = [5;3;5].
+Proof. reflexivity. Qed.
+Example test_fold_map2: fold_map oddb [2;1;2;5] = [false;true;false;true].
+Proof. reflexivity. Qed.
+Example test_fold_map3: fold_map (fun n => [evenb n;oddb n]) [2;1;2;5]
+  = [[true;false];[false;true];[true;false];[false;true]].
+Proof. reflexivity. Qed.
+
+Theorem fold_map_correct : forall X Y (l : list X) (f : X -> Y),
+  fold_map f l = map f l.
+Proof.
+  intros X Y l f. induction l.
+  - simpl. reflexivity.
+  - simpl. rewrite <- IHl. unfold fold_map. simpl. reflexivity.
+Qed.
