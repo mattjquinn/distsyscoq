@@ -435,3 +435,71 @@ Example fold_example2 : fold andb [true;true;false;true] true = false.
 Proof. reflexivity. Qed.
 Example fold_example3 : fold app [[1]; []; [2;3]; [4]] [] = [1;2;3;4].
 Proof. reflexivity. Qed.
+
+(* Exercise: fold_types_different
+   Since X and Y are different types, we can apply functions that
+   map from X to Y and combine them; for instance, checking of all
+   numbers in a list are even:
+*)
+Example fold_example4 : fold (fun n b => andb (evenb n) b)
+  [2; 4; 6; 8] true = true.
+Proof. reflexivity. Qed.
+Example fold_example5 : fold (fun n b => andb (evenb n) b)
+  [2; 3; 6; 8] true = false.
+Proof. reflexivity. Qed.
+
+Definition constfun {X: Type} (x : X) : nat -> X :=
+  fun (k:nat) => x.
+Definition ftrue := constfun true.
+Example constfun_example1 : ftrue 0 = true.
+Proof. reflexivity. Qed.
+Example constfun_example2 : (constfun 5) 99 = 5.
+Proof. reflexivity. Qed.
+
+Check plus.
+
+Definition plus3 := plus 3.
+Check plus3.
+
+Example test_plus3 : plus3 4 = 7.
+Proof. reflexivity. Qed.
+Example test_plust3': doit3times plus3 0 = 9.
+Proof. reflexivity. Qed.
+Example test_plust3'' : doit3times (plus 3) 0 = 9.
+Proof. reflexivity. Qed.
+
+Module Exercises.
+
+Definition fold_length {X: Type} (l : list X) : nat :=
+  fold (fun _ n => S n) l 0.
+Example test_fold_length1 : fold_length [4;7;0] = 3.
+Proof. reflexivity. Qed.
+
+(*Lemma fold_length_distr : forall X (l : list X) (x : X),
+  fold_length ([x] ++ l) = fold_length [x] + fold_length l.
+Proof.
+  intros X l x. induction l.
+  - simpl. reflexivity.
+  - simpl.*)
+
+Lemma fold_length_replace : forall X (l : list X),
+  fold_length l = fold (fun _ n => S n) l 0.
+Proof. reflexivity. Qed.
+
+Theorem fold_length_correct : forall X (l : list X),
+  fold_length l = length l.
+Proof.
+  intros X l. induction l.
+  - simpl. reflexivity.
+  - simpl. rewrite fold_length_replace. simpl.
+    rewrite <- IHl. rewrite fold_length_replace. reflexivity.
+Qed.
+
+Theorem fold_length_correct' : forall X (l : list X),
+  fold_length l = length l.
+Proof.
+  intros X l. induction l.
+  - simpl. reflexivity.
+  - simpl. unfold fold_length. simpl.
+    rewrite <- IHl. unfold fold_length. reflexivity.
+Qed.
