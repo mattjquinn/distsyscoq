@@ -521,3 +521,107 @@ Proof.
   - simpl. reflexivity.
   - simpl. rewrite <- IHl. unfold fold_map. simpl. reflexivity.
 Qed.
+
+Definition prod_curry {X Y Z : Type}
+  (f : X * Y -> Z) (x : X) (y : Y) : Z := f (x, y).
+
+Definition prod_uncurry {X Y Z : Type}
+  (f : X -> Y -> Z) (p : X * Y) : Z := (f (fst p)) (snd p).
+
+(* Check @prod_curry will return: forall X : Type, forall Y : Type,
+  forall Z : Type -> f : X * Y -> X -> Y -> Z. *)
+Check @prod_curry.
+(* CORRECT ANSWER: forall X Y Z : Type, (X * Y -> Z) -> X -> Y -> Z *)
+(* Check @prod_uncurry will return: forall X Y Z : Type,
+    (X -> Y -> Z) -> (X * Y) -> Z. *)
+Check @prod_uncurry.
+(* ANSWER IS CORRECT *)
+
+Theorem uncurry_curry : forall (X Y Z : Type)
+                        (f : X -> Y -> Z) x y,
+  prod_curry (prod_uncurry f) x y = f x y.
+Proof.
+  intros X Y Z f x y. unfold prod_curry.
+  unfold prod_uncurry. simpl. reflexivity. Qed.
+
+Theorem curry_uncurry : forall (X Y Z : Type)
+                        (f : (X * Y) -> Z) (p : X * Y),
+  prod_uncurry (prod_curry f) p = f p.
+Proof.
+  intros X Y Z f p. unfold prod_uncurry.
+  unfold prod_curry. destruct p. simpl. reflexivity.
+Qed.
+
+(* Exercise: nth_error_informal
+   Theorem: ∀X n l, length l = n -> @nth_error X l n = None
+   Proof: By induction on n.
+     Base: Our induction hypothesis is:
+        length l = 0 -> @nth_error X l 0 = None
+     The only list of length 0 is the nil list []. Thus l is [],
+     and by definition of nth_error, [] is mapped to None, satisfying
+     our hypothesis.
+
+     Inductive: Our induction hypothesis is:
+        length l = n + 1 -> @nth_error X l (n + 1) = None
+     Any list X of length (n + 1) has (n + 1) elements of type X within
+     it. If each is mapped to an index (natural number) starting with 0,
+     as done in nth_error, the (n + 1)th element will be []. By definition
+     of nth_error, [] is mapped to None, satisfying our hypothesis.
+*)
+
+Module Church.
+
+Definition nat := forall X : Type, (X -> X) -> X -> X.
+Definition one : nat := fun (X : Type) (f : X -> X) (x : X) => f x.
+Definition two : nat := fun (X : Type) (f : X -> X) (x : X) => f (f x).
+Definition zero: nat := fun (X : Type) (f : X -> X) (x : X) => x.
+Definition three: nat := @doit3times.
+Check @doit3times.
+
+
+Definition succ (n : nat) : nat := 
+  fun (X : Type) (f : X -> X) (x : X) => f (n X f x).
+Example succ_1 : succ zero = one.
+Proof. reflexivity. Qed.
+Example succ_2 : succ one = two.
+Proof. reflexivity. Qed.
+Example succ_3 : succ two = three.
+Proof. reflexivity. Qed.
+
+Definition plus (n m : nat) : nat :=
+  fun (X : Type) (f : X -> X) (x : X) => n X f (m X f x).
+Example plus_1 : plus zero one = one.
+Proof. reflexivity. Qed.
+Example plus_2 : plus two three = plus three two.
+Proof. reflexivity. Qed.
+Example plus_3 :
+  plus (plus two two) three = plus one (plus three three).
+Proof. reflexivity. Qed.
+
+Definition mult (n m : nat) : nat :=
+  fun (X : Type) (f : X -> X) (x : X) => n X (m X f) x.
+Compute mult one three.
+Example mult_1 : mult one one = one.
+Proof. reflexivity. Qed.
+Example mult_2 : mult zero (plus three three) = zero.
+Proof. reflexivity. Qed.
+Example mult_3 : mult two three = plus three three.
+Proof. reflexivity. Qed.
+
+(* I do not understand this definition for exp, I barely
+   understand the above ones for plus and mult. I had to look
+   this one up online. The polymorphism here is extremely confusing,
+   and I don't currently know of a way to step through or visualize
+   this definition. *)
+Definition exp (n m : nat) : nat :=
+  fun (X : Type) => m (X -> X) (n X).
+Compute exp two three.
+Example exp_1 : exp two two = plus two two.
+Proof. reflexivity. Qed.
+Example exp_2 : exp three two = plus (mult two (mult two two)) one.
+Proof. reflexivity. Qed.
+Example exp_3 : exp three zero = one.
+Proof. reflexivity. Qed.
+
+End Church.
+End Exercises.
