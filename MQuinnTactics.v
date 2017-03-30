@@ -149,4 +149,19 @@ Theorem S_inj : forall (n m : nat) (b : bool),
 Proof.
   intros n m b H. simpl in H. apply H. Qed.
 
+Theorem silly3' : forall(n : nat),
+  (beq_nat n 5 = true -> beq_nat (S (S n)) 7 = true) ->
+  true = beq_nat n 5 -> true = beq_nat (S (S n)) 7.
+Proof.
+  intros n eq H. symmetry in H. apply eq in H. symmetry in H.
+  apply H. Qed.
+
+(* This was my failed attempt; was unable to finish this. *)
+Theorem plus_n_n_injective_failed : forall n m,
+  n + n = m + m -> n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - intros m eq1. simpl in eq1. destruct m. reflexivity. inversion eq1.
+  - intros m eq1. inversion eq1. rewrite <- plus_n_Sm in H0.
+    symmetry in H0. Abort.
 
