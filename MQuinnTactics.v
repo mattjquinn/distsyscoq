@@ -165,3 +165,92 @@ Proof.
   - intros m eq1. inversion eq1. rewrite <- plus_n_Sm in H0.
     symmetry in H0. Abort.
 
+Theorem double_injective : forall n m,
+  double n = double m -> n = m.
+Proof.
+  intros n m. induction n as [| n'].
+  - simpl. intros eq. destruct m as [| m'].
+    + reflexivity.
+    + inversion eq.
+  - intros eq. destruct m as [| m'].
+    + inversion eq.
+    + apply f_equal. Abort.
+
+Theorem double_injective : forall n m,
+  double n = double m -> n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - simpl. intros m eq. destruct m as [| m'].
+    + reflexivity.
+    + inversion eq.
+  - simpl. intros m eq. destruct m as [| m'].
+    + inversion eq.
+    + apply f_equal. apply IHn'. inversion eq. reflexivity. Qed.
+
+Theorem beq_nat_true : forall n m, beq_nat n m = true -> n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - intros m H. destruct m as [| m'].
+    + reflexivity.
+    + inversion H.
+  - intros m H. destruct m as [| m'].
+    + inversion H.
+    + apply IHn' in H. rewrite H. reflexivity. Qed.
+
+(* Exercise: beq_nat_true_informal
+   Theorem: ∀X n m, beq_nat n m = true -> n = m.
+   Proof: By induction on n.
+     Base: Our induction hypothesis is:
+        beq_nat 0 m = true -> 0 = m
+     Any natural number m is either zero or greater than zero.
+     The first case trivially satisfies the implication 0 = m. The second
+     implication 0 = S m' would only result if beq_nat 0 (S m') = true,
+     which it does not.
+
+     Inductive: Our induction hypothesis is:
+        beq_nat (S n') m = true -> S n' = m
+     Again, any natural number is either zero or grater than zero.
+     The first case is trivially false: S n' = 0 would only arise
+     if beq_nat (S n') 0 = true, contrary to its definition. The scecond
+     case S n' = S m' is true if our value for S n' = S m'. And if
+     S n' = S m', then n' = m', concluding our proof.
+*)
+
+Theorem double_injective_take2_FAILED : forall n m,
+  double n = double m -> n = m.
+Proof.
+  intros n m. induction m as [| m'].
+  - simpl. intros eq. destruct n as [| n'].
+    + reflexivity.
+    + inversion eq.
+  - intros eq. destruct n as [| n'].
+    + inversion eq.
+    + apply f_equal. Abort.
+
+Theorem double_injective_take2 : forall n m,
+  double n = double m -> n = m.
+Proof.
+  intros n m. generalize dependent n.
+  induction m as [| m'].
+  - simpl. intros n eq. destruct n as [| n'].
+    + reflexivity.
+    + inversion eq.
+  - simpl. intros n eq. destruct n as [| n'].
+    + inversion eq.
+    + simpl in eq. apply f_equal. apply IHm'.
+      inversion eq. reflexivity. Qed.
+
+Theorem beq_id_true : forall x y,
+  beq_id x y = true -> x = y.
+Proof.
+  intros [m] [n]. simpl. intros H.
+  assert (H': m = n). {apply beq_nat_true. apply H. }
+  rewrite H'. reflexivity. Qed.
+
+Theorem nth_error_after_last : forall (n : nat) (X : Type) (l : list X),
+  length l = n -> nth_error l n = None.
+Proof.
+  intros n X l. generalize dependent n. induction l as [| l'].
+  - intros n H1. reflexivity.
+  - intros n H1. simpl. simpl in H1. rewrite <- H1. simpl.
+    apply IHl. reflexivity. Qed.
