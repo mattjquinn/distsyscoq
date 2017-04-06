@@ -367,3 +367,15 @@ Proof.
     + destruct (f true) eqn:Htrue.
       apply Htrue. apply Hfalse.
     + rewrite Hfalse. apply Hfalse. Qed.
+
+Theorem beq_nat_sym : forall (n m : nat),
+  beq_nat n m = beq_nat m n.
+Proof.
+  intros n. induction n as [| n'].
+  - simpl. intros m. destruct m.
+    + reflexivity.
+    + reflexivity.
+  - simpl. intros m. destruct m.
+    + reflexivity.
+    + simpl. apply IHn'. Qed.
+
