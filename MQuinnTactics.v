@@ -379,3 +379,33 @@ Proof.
     + reflexivity.
     + simpl. apply IHn'. Qed.
 
+(* Theorem: For any nats n m, beq_nat n m = beq_nat m n.
+   Proof: Let n be a nat. We prove by induction on n that, for any
+          m, beq_nat n m = beq_nat m n.
+   - First suppose n is 0, and m is a number such that beq_nat n m =
+     beq_nat m n. We must show that both sides are equivalent, and thus
+     order of parameters doesn't matter.
+
+     When n = 0, m could be either 0 or non-zero. If m is 0, we have
+        beq_nat 0 0 = beq_nat 0 0
+     which is trivially equal. If m is non-zero, we have
+        beq_nat 0 (S m') = beq_nat (S m') 0;
+     both sides are false due to disjointedness of constructors for nat,
+     and thus trivially equally.
+
+   - Second, suppose n is non-zero, and m is again a number such that
+     beq_nat n m = beq_nat m n. We must again show that both sides are
+     equivalent, and thus order of parameters doesn't matter, with the
+     unduction hypothesis being that all m, beq_nat n' m = beq_nat m n'.
+
+     When n = (S n'), m could be either 0 or non-zero. If m is 0, we have
+        beq_nat (S n') 0 = beq_nat 0 (S n')
+     which is false on both sides and thus trivially equally. If m is
+     non-zero, we have
+        beq_nat n' m = beq_nat (S m) (S n')
+     which, by injectivity of constructors, allows us to restate the
+     equality as:
+        beq_nat n' m = beq_nat m n'
+     This is our induction hypothesis, and the proof is complete.
+*)
+
