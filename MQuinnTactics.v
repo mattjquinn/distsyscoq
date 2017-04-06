@@ -409,3 +409,25 @@ Proof.
      This is our induction hypothesis, and the proof is complete.
 *)
 
+Theorem beq_nat_trans : forall n m p,
+  beq_nat n m = true -> beq_nat m p = true -> beq_nat n p = true.
+Proof.
+  intros n. induction n as [| n'].
+  - simpl. intros m. destruct m.
+    + simpl. intros p. destruct p. reflexivity.
+      intros H1 H2. apply H2.
+    + simpl. intros p. destruct p. reflexivity.
+      intros H1 H2. apply H1.
+  - intros m. destruct m.
+    + intros p. destruct p.
+      intros H1 H2. apply H1.
+      intros H1 H2. simpl. apply IHn' with (m:=0).
+      inversion H1. inversion H2.
+    + intros p. destruct p.
+      intros H1 H2. inversion H2.
+      intros H1 H2. simpl. simpl in H1. simpl in H2.
+      apply IHn' in H1. apply IHn' in H2.
+      apply H2. apply H1. symmetry. apply beq_nat_refl. Qed.
+
+
+      
