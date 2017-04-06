@@ -254,3 +254,116 @@ Proof.
   - intros n H1. reflexivity.
   - intros n H1. simpl. simpl in H1. rewrite <- H1. simpl.
     apply IHl. reflexivity. Qed.
+
+Definition square n := n * n.
+
+Lemma square_mult : forall n m, square (n * m) = square n * square m.
+Proof.
+  intros n m. simpl. unfold square.
+  rewrite mult_assoc. assert (H : n * m * n = n * n * m).
+  { rewrite mult_comm. apply mult_assoc. }
+  rewrite H. rewrite mult_assoc. reflexivity. Qed.
+
+Definition foo (x : nat) := 5.
+
+Fact silly_fact_1 : forall m, foo m + 1 = foo (m + 1) + 1.
+Proof.
+  intros m. simpl. reflexivity. Qed.
+
+Definition bar x :=
+  match x with
+  | O => 5
+  | S _ => 5
+  end.
+
+Fact silly_fact_2_FAILED : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m. simpl. Abort.
+
+Fact silly_fact_2 : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m. destruct m.
+  - reflexivity.
+  - reflexivity. Qed.
+
+Fact silly_fact_2' : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m. unfold bar. destruct m.
+  - reflexivity.
+  - reflexivity. Qed.
+
+Definition sillyfun (n : nat) : bool :=
+  if beq_nat n 3 then false
+  else if beq_nat n 5 then false
+  else false.
+
+Theorem sillyfun_false : forall (n : nat),
+  sillyfun n = false.
+Proof.
+  intros n. unfold sillyfun. destruct (beq_nat n 3).
+  - reflexivity.
+  - destruct (beq_nat n 5).
+    + reflexivity.
+    + reflexivity. Qed.
+
+Theorem combine_split_MY_FAILED_ATTEMPT : forall X Y (l : list (X * Y)) l1 l2,
+  split l = (l1, l2) -> combine l1 l2 = l.
+Proof.
+  intros X Y l. induction l as [| l'].
+  - intros l1 l2 H1. simpl in H1. inversion H1. reflexivity.
+  - intros l1 l2 H1. Abort. (* Couldn't figure out what compound expressio
+                               to destruct. *)
+
+(* Second attempt, with guidance from online solution. *)
+Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
+  split l = (l1, l2) -> combine l1 l2 = l.
+Proof.
+  intros X Y l. induction l as [| [x y] l'].
+  (* NOTE: Destructing as [x y] l' is critical here; I didn't do that
+     before, so I got stuck b/c there wasn't much to work with: (l' :: l)
+     rather than ([x y] :: l'). *)
+  - intros l1 l2 H. inversion H. reflexivity.
+  - intros l1 l2. simpl. (* The solution works with H before putting it
+    in the context. *)
+    destruct (split l').
+    destruct l1. intros H. inversion H.
+    destruct l2. intros H. inversion H.
+    intros H. inversion H. simpl. rewrite IHl'.
+    + reflexivity.
+    + rewrite H2. rewrite H4. reflexivity.
+Qed. (* Although I understand how this proof works, I have no idea
+        how to provide a natural language explanation of it. *)
+
+Definition sillyfun1 (n : nat) : bool :=
+  if beq_nat n 3 then true else if beq_nat n 5 then true else false.
+
+Theorem sillyfun1_odd_FAILED : forall (n : nat),
+  sillyfun1 n = true -> oddb n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (beq_nat n 3). Abort.
+
+Theorem sillyfun1_odd : forall (n : nat),
+  sillyfun1 n = true -> oddb n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (beq_nat n 3) eqn:Heqe3.
+  - apply beq_nat_true in Heqe3.
+    rewrite Heqe3. reflexivity.
+  - destruct (beq_nat n 5) eqn:Heqe5.
+    + apply beq_nat_true in Heqe5.
+      rewrite Heqe5. reflexivity.
+    + inversion eq. Qed.
+
+Theorem bool_fn_applied_twice : forall (f : bool -> bool) (b : bool),
+  f (f (f b)) = f b.
+Proof.
+  intros f b. destruct b.
+  - destruct (f true) eqn:Htrue.
+    + rewrite Htrue. apply Htrue.
+    + destruct (f false) eqn:Hfalse.
+      apply Htrue. apply Hfalse.
+  - destruct (f false) eqn:Hfalse.
+    + destruct (f true) eqn:Htrue.
+      apply Htrue. apply Hfalse.
+    + rewrite Hfalse. apply Hfalse. Qed.
