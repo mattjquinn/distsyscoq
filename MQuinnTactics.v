@@ -429,5 +429,30 @@ Proof.
       apply IHn' in H1. apply IHn' in H2.
       apply H2. apply H1. symmetry. apply beq_nat_refl. Qed.
 
+Definition split_combine_statement : Prop := 
+  forall X Y (l : list (X * Y)) l1 l2,
+  length l1 = length l2 -> combine l1 l2 = l -> split l = (l1, l2).
+
+Compute (split (combine [1;2] [false;false;true;true])).
+Compute (split (combine [false;false;true;true] [1;2])).
+
+Lemma split_combine_involutive :
+  forall (X Y : Type) (l1 : list X) (l2 : list Y),
+  length l1 = length l2 -> split (combine l1 l2) = (l1, l2).
+Proof.
+  intros X Y. induction l1.
+  - intros l2 H. simpl. destruct l2.
+    + reflexivity.
+    + inversion H.
+  - intros l2 H. simpl. destruct l2.
+    + inversion H.
+    + simpl in H. simpl. rewrite IHl1.
+      reflexivity. inversion H. reflexivity. Qed.
+
+Theorem split_combine : split_combine_statement.
+Proof.
+  intros X Y l l1 l2 H1 H2. inversion H2. 
+  apply split_combine_involutive. apply H1. Qed.
+
 
       
