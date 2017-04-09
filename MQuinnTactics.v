@@ -454,5 +454,25 @@ Proof.
   intros X Y l l1 l2 H1 H2. inversion H2. 
   apply split_combine_involutive. apply H1. Qed.
 
-
-      
+Theorem filter_exercise : forall (X : Type) (test : X -> bool)
+                                 (x : X) (l lf : list X),
+  filter test l = x :: lf -> test x = true.
+Proof.
+  (* NOTE: I got this one by myself, this is the coolest success
+     I've yet had with Coq. *)
+  intros X. induction l as [| a l' ].
+  - intros lf H. destruct (test x).
+    + reflexivity.
+    + inversion H.
+  - intros lf H. destruct (test x) eqn:TESTXeq.
+    + reflexivity.
+    + generalize dependent H. simpl.
+      { destruct (test a) eqn:TESTAeq.
+      - intros H. inversion H.
+        (* This is the cool part. Using the hypotheses
+           from the destruction, we equate test a and test x.
+           But we know that a and x are the same from hypothesis H,
+           so this is impossible; they must always be equal. *)
+        rewrite <- TESTXeq. rewrite <- TESTAeq.
+        rewrite H1. reflexivity.
+      - apply IHl'. } Qed.
