@@ -476,3 +476,67 @@ Proof.
         rewrite <- TESTXeq. rewrite <- TESTAeq.
         rewrite H1. reflexivity.
       - apply IHl'. } Qed.
+
+Fixpoint forallb {X : Type} (test : X -> bool) (l : list X) :=
+  match l with
+  | [] => true
+  | h :: t => (andb (test h) (forallb test t))
+  end.
+Example forallb_ex1 : forallb oddb [1;3;5;7;9] = true.
+Proof. reflexivity. Qed.
+Example forallb_ex2 : forallb negb [false;false] = true.
+Proof. reflexivity. Qed.
+Example forallb_ex3 : forallb evenb [0;2;4;5] = false.
+Proof. reflexivity. Qed.
+Example forallb_ex4 : forallb (beq_nat 5) [] = true.
+Proof. reflexivity. Qed.
+
+Fixpoint existsb {X : Type} (test : X -> bool) (l : list X) :=
+  match l with
+  | [] => false
+  | h :: t => (orb (test h) (existsb test t))
+  end.
+Example existsb_ex1 : existsb (beq_nat 5) [0;2;3;6] = false.
+Proof. reflexivity. Qed.
+Example existsb_ex2 : existsb (andb true) [true;true;false] = true.
+Proof. reflexivity. Qed.
+Example existsb_ex3 : existsb oddb [1;0;0;0;0;3] = true.
+Proof. reflexivity. Qed.
+Example existsb_ex4 : existsb evenb [] = false.
+Proof. reflexivity. Qed.
+
+Definition existsb' {X : Type} (test : X -> bool) (l : list X) :=
+  negb (forallb (fun x => negb (test x)) l).
+Example existsb'_ex1 : existsb' (beq_nat 5) [0;2;3;6] = false.
+Proof. reflexivity. Qed.
+Example existsb'_ex2 : existsb' (andb true) [true;true;false] = true.
+Proof. reflexivity. Qed.
+Example existsb'_ex3 : existsb' oddb [1;0;0;0;0;3] = true.
+Proof. reflexivity. Qed.
+Example existsb'_ex4 : existsb' evenb [] = false.
+Proof. reflexivity. Qed.
+
+
+(* a || (negb b) = negb ((negb a) && b)
+T T -> true || false = negb (false && true) = true
+T F -> true || true = negb (false && false) = true
+F T -> false || false = negb (true && true) = false
+F F -> false || true = negb (true && false) = true *)
+Lemma or_neg_equals_neg_neg_and : forall (a b : bool),
+  a || (negb b) = negb ((negb a) && b).
+Proof.
+  intros a b. destruct a.
+  - destruct b.
+    + reflexivity.
+    + reflexivity.
+  - destruct b.
+    + reflexivity.
+    + reflexivity. Qed.
+
+Theorem existsb_existsb' : forall (X : Type) (test : X -> bool) (l : list X),
+  existsb test l = existsb' test l.
+Proof.
+  intros X test l. induction l.
+  - simpl. unfold existsb'. unfold forallb. reflexivity.
+  - simpl. unfold existsb'. simpl. rewrite IHl.
+    unfold existsb'. apply or_neg_equals_neg_neg_and. Qed.
