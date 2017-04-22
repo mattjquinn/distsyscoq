@@ -120,3 +120,107 @@ Proof.
   - right. apply HP.
   - left. apply HQ. Qed.
 
+Module MyNot.
+
+Definition not (P:Prop) := P -> False.
+Notation "~ x" := (not x) : type_scope.
+Check not.
+
+End MyNot.
+
+Theorem ex_falso_quodlibet : forall (P : Prop),
+  False -> P.
+Proof.
+  intros P contra.
+  destruct contra. Qed.
+
+Fact not_implies_our_not : forall (P : Prop),
+  ~P -> (forall (Q : Prop), P -> Q).
+Proof.
+  intros P H1 Q H2.
+  destruct H1. apply H2. Qed.
+
+Theorem zero_not_one : ~(0 = 1).
+Proof.
+  intros contra. inversion contra. Qed.
+
+Check (0 <> 1).
+
+Theorem zero_not_one' : 0 <> 1.
+Proof.
+  intros H. inversion H. Qed.
+
+Theorem not_False : ~False.
+Proof.
+  unfold not. intros H. inversion H. Qed.
+
+Theorem contradiction_implies_anything : forall P Q : Prop,
+  (P /\ ~P) -> Q.
+Proof.
+  intros P Q [H1 H2]. destruct H2. apply H1. Qed.
+
+Theorem contradiction_implies_anything' : forall P Q : Prop,
+  (P /\ ~P) -> Q.
+Proof.
+  intros P Q [HP HNA]. unfold not in HNA.
+  apply HNA in HP. destruct HP. Qed.
+
+Theorem double_neg : forall P : Prop,
+  P -> ~~P.
+Proof.
+  intros P H1. unfold not. intros H2. apply H2. apply H1. Qed.
+
+(* Theorem: P implies ~~P, for any proposition P.
+   Proof: Let P be a proposition. P could be either True or False.
+
+   If P is True, we have True -> ~~True
+                         True -> ~False
+                         True -> True
+   which follows trivially from application of the predicate.
+
+   If P is False, we have False -> ~~False. By ex falso quodlibet,
+   assuming False allows us to assert anything, including ~~False.
+*)
+
+Theorem contrapositive : forall (P Q : Prop),
+  (P -> Q) -> (~Q -> ~P).
+Proof.
+  intros P Q H1 H2. unfold not. intros H3. destruct H2. apply H1 in H3.
+  apply H3. Qed.
+
+Theorem not_both_true_and_false : forall P : Prop,
+  ~(P /\ ~P).
+Proof.
+  intros P [H1 H2]. destruct H2. apply H1. Qed.
+
+(* Theorem: ~(P /\ ~P) for any proposition P.
+   Proof: Let P be a proposition. P could be either True or False.
+
+   If P is True, we have ~(True /\ ~True)
+                         ~(True /\ False)
+                         ~False
+   which is True.
+
+   If P is False, we have ~(False /\ ~False)
+                          ~(False /\ True)
+                          ~False
+   which is True.
+*)
+
+Theorem not_true_is_false : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros [] H.
+  - (* b = true *)
+    unfold not in H.
+    apply ex_falso_quodlibet. apply H. reflexivity.
+  - (* b = false *)
+    reflexivity. Qed.
+
+Theorem not_true_is_false' : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros [] H.
+  - unfold not in H. exfalso. apply H. reflexivity.
+  - reflexivity. Qed.
+
