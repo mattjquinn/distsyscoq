@@ -226,3 +226,27 @@ Proof.
 
 Lemma True_is_true : True.
 Proof. apply I. Qed.
+
+Module MyIff.
+
+Definition iff (P Q : Prop) := (P -> Q) /\ (Q -> P).
+
+Notation "P <-> Q" := (iff P Q)
+                      (at level 95, no associativity) : type_scope.
+
+End MyIff.
+
+Theorem iff_sym : forall P Q : Prop,
+  (P <-> Q) -> (Q <-> P).
+Proof.
+  intros P Q [HA HB].
+  unfold iff. split.
+  apply HB. apply HA. Qed.
+
+Lemma not_true_iff_false : forall b,
+  b <> true <-> b = false.
+Proof.
+  intros b. split.
+  - apply not_true_is_false.
+  - intros H. rewrite H. intros H'. inversion H'. Qed.
+
