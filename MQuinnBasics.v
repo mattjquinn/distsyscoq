@@ -452,6 +452,8 @@ Proof.
     + reflexivity.
 Qed.
 
+Module MyBin.
+
 Inductive bin : Type :=
   | Z : bin
   | D : bin -> bin
@@ -504,3 +506,5 @@ Example test_bin_to_nat6: bin_to_nat (D (I (I Z))) = 6.
 Proof. simpl. reflexivity. Qed.
 Example test_bin_to_nat7: bin_to_nat (I (I (I Z))) = 7.
 Proof. simpl. reflexivity. Qed.
+
+End MyBin.

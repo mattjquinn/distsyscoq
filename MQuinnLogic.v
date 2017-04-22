@@ -224,3 +224,5 @@ Proof.
   - unfold not in H. exfalso. apply H. reflexivity.
   - reflexivity. Qed.
 
+Lemma True_is_true : True.
+Proof. apply I. Qed.

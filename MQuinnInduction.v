@@ -257,51 +257,51 @@ Proof.
   replace (p + n) with (n + p). reflexivity.
   rewrite plus_comm. reflexivity. Qed.
 
-Theorem bin_to_nat_pres_incr : forall b : bin,
-  bin_to_nat (incr b) = S (bin_to_nat b).
+Theorem bin_to_nat_pres_incr : forall b : MyBin.bin,
+  MyBin.bin_to_nat (MyBin.incr b) = S (MyBin.bin_to_nat b).
 Proof.
   intros b. induction b.
   - reflexivity.
   - simpl. rewrite <- plus_n_0. rewrite plus_n_Sm.
     rewrite <- plus_assoc.
-    replace (bin_to_nat b + 1) with (S (bin_to_nat b)).
+    replace (MyBin.bin_to_nat b + 1) with (S (MyBin.bin_to_nat b)).
     + reflexivity.
     + rewrite <- plus_1_l. rewrite plus_comm. reflexivity.
   - simpl. rewrite <- plus_n_0. rewrite <- plus_n_0.
     rewrite <- plus_1_l. rewrite IHb. rewrite plus_assoc.
-    rewrite plus_assoc. replace (1 + bin_to_nat b)
-    with (S (bin_to_nat b)). rewrite <- plus_assoc.
-    replace (bin_to_nat b + 1) with (S (bin_to_nat b)).
+    rewrite plus_assoc. replace (1 + MyBin.bin_to_nat b)
+    with (S (MyBin.bin_to_nat b)). rewrite <- plus_assoc.
+    replace (MyBin.bin_to_nat b + 1) with (S (MyBin.bin_to_nat b)).
     + reflexivity.
     + rewrite plus_comm. reflexivity.
     + reflexivity.
 Qed.
 
 (* Part a. *)
-Fixpoint nat_to_bin (n:nat) : bin :=
+Fixpoint nat_to_bin (n:nat) : MyBin.bin :=
   match n with
-  | O => Z
-  | S n' => incr (nat_to_bin n')
+  | O => MyBin.Z
+  | S n' => MyBin.incr (nat_to_bin n')
   end.
-Example test_nat_to_bin0: nat_to_bin 0 = Z.
+Example test_nat_to_bin0: nat_to_bin 0 = MyBin.Z.
 Proof. simpl. reflexivity. Qed.
-Example test_nat_to_bin1: nat_to_bin 1 = (I Z).
+Example test_nat_to_bin1: nat_to_bin 1 = (MyBin.I MyBin.Z).
 Proof. simpl. reflexivity. Qed.
-Example test_nat_to_bin2: nat_to_bin 2 = (D (I Z)).
+Example test_nat_to_bin2: nat_to_bin 2 = (MyBin.D (MyBin.I MyBin.Z)).
 Proof. simpl. reflexivity. Qed.
-Example test_nat_to_bin3: nat_to_bin 3 = (I (I Z)).
+Example test_nat_to_bin3: nat_to_bin 3 = (MyBin.I (MyBin.I MyBin.Z)).
 Proof. simpl. reflexivity. Qed.
-Example test_nat_to_bin4: nat_to_bin 4 = (D (D (I Z))).
+Example test_nat_to_bin4: nat_to_bin 4 = (MyBin.D (MyBin.D (MyBin.I MyBin.Z))).
 Proof. simpl. reflexivity. Qed.
-Example test_nat_to_bin5: nat_to_bin 5 = (I (D (I Z))).
+Example test_nat_to_bin5: nat_to_bin 5 = (MyBin.I (MyBin.D (MyBin.I MyBin.Z))).
 Proof. simpl. reflexivity. Qed.
-Example test_nat_to_bin6: nat_to_bin 6 = (D (I (I Z))).
+Example test_nat_to_bin6: nat_to_bin 6 = (MyBin.D (MyBin.I (MyBin.I MyBin.Z))).
 Proof. simpl. reflexivity. Qed.
-Example test_nat_to_bin7: nat_to_bin 7 = (I (I (I Z))).
+Example test_nat_to_bin7: nat_to_bin 7 = (MyBin.I (MyBin.I (MyBin.I MyBin.Z))).
 Proof. simpl. reflexivity. Qed.
 
 Theorem nat_to_bin_to_nat_eq : forall n : nat,
-  bin_to_nat (nat_to_bin n) = n.
+  MyBin.bin_to_nat (nat_to_bin n) = n.
 Proof.
   intros n. induction n as [| n' IHn'].
   - reflexivity.
@@ -326,30 +326,30 @@ same number we started with.
 *)
 
 (* Part c. *)
-Fixpoint normalize (b:bin) : bin := 
+Fixpoint normalize (b:MyBin.bin) : MyBin.bin := 
   match b with
-  | Z => Z
-  | I b' => I (normalize b')
-  | D b' => match (bin_to_nat b') with
-            | O => Z
-            | S _ => D (normalize b')
+  | MyBin.Z => MyBin.Z
+  | MyBin.I b' => MyBin.I (normalize b')
+  | MyBin.D b' => match (MyBin.bin_to_nat b') with
+            | O => MyBin.Z
+            | S _ => MyBin.D (normalize b')
             end
   end.
-Example test_normalize1: normalize (D Z) = Z.
+Example test_normalize1: normalize (MyBin.D MyBin.Z) = MyBin.Z.
 Proof. simpl. reflexivity. Qed.
-Example test_normalize2: normalize (D (D Z)) = Z.
+Example test_normalize2: normalize (MyBin.D (MyBin.D MyBin.Z)) = MyBin.Z.
 Proof. simpl. reflexivity. Qed.
-Example test_normalize3: normalize (D (D (D Z))) = Z.
+Example test_normalize3: normalize (MyBin.D (MyBin.D (MyBin.D MyBin.Z))) = MyBin.Z.
 Proof. simpl. reflexivity. Qed.
-Example test_normalize4: normalize (I (D (D (D Z)))) = I Z.
+Example test_normalize4: normalize (MyBin.I (MyBin.D (MyBin.D (MyBin.D MyBin.Z)))) = MyBin.I MyBin.Z.
 Proof. simpl. reflexivity. Qed.
-Example test_normalize5: normalize (D (I (D (D (D Z))))) = D (I Z).
+Example test_normalize5: normalize (MyBin.D (MyBin.I (MyBin.D (MyBin.D (MyBin.D MyBin.Z))))) = MyBin.D (MyBin.I MyBin.Z).
 Proof. simpl. reflexivity. Qed.
-Example test_normalize6: normalize (I Z) = (I Z).
+Example test_normalize6: normalize (MyBin.I MyBin.Z) = (MyBin.I MyBin.Z).
 Proof. simpl. reflexivity. Qed.
 
 Lemma nat_even_sum_to_bin_always_d_prefix: forall n:nat,
-  nat_to_bin ((S n) + (S n)) = D (nat_to_bin (S n)).
+  nat_to_bin ((S n) + (S n)) = MyBin.D (nat_to_bin (S n)).
 Proof.
   intros n. induction n.
   - reflexivity.
@@ -362,7 +362,7 @@ Proof.
 Qed.
 
 Lemma nat_odd_sum_to_bin_always_i_prefix: forall n:nat,
-  nat_to_bin (n + n + 1) = I (nat_to_bin n).
+  nat_to_bin (n + n + 1) = MyBin.I (nat_to_bin n).
 Proof.
   intros n. induction n.
   - reflexivity.
@@ -372,12 +372,12 @@ Proof.
       rewrite plus_assoc. reflexivity.
 Qed.
 
-Theorem normalize_eq_bin_to_nat_to_bin: forall b:bin,
-  (nat_to_bin (bin_to_nat b)) = normalize b.
+Theorem normalize_eq_bin_to_nat_to_bin: forall b:MyBin.bin,
+  (nat_to_bin (MyBin.bin_to_nat b)) = normalize b.
 Proof.
   intros b. induction b.
   - reflexivity.
-  - simpl. rewrite <- plus_n_0. destruct (bin_to_nat b).
+  - simpl. rewrite <- plus_n_0. destruct (MyBin.bin_to_nat b).
     + reflexivity.
     + rewrite <- IHb. rewrite nat_even_sum_to_bin_always_d_prefix.
       reflexivity.
