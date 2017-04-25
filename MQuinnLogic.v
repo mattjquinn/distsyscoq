@@ -274,7 +274,7 @@ Proof.
     + { split.
       - left. apply HL.
       - left. apply HL. }
-    + { destruct HR. split. 
+    + { destruct HR. split.
       - right. apply H.
       - right. apply H0. }
   - intros [[HP1 | HQ][HP2 | HR]].
@@ -284,4 +284,58 @@ Proof.
     + (* Q and R are true *) right. { split.
       - apply HQ.
       - apply HR. } Qed.
+
+Require Import Coq.Setoids.Setoid.
+
+Lemma mult_0 : forall n m, n * m = 0 <-> n = 0 \/ m = 0.
+Proof.
+  split.
+  - apply mult_eq_0.
+  - apply or_example. Qed.
+
+Lemma or_assoc : forall P Q R : Prop, P \/ (Q \/ R) <-> (P \/ Q) \/ R.
+Proof.
+  intros P Q R. split.
+  - intros [H | [H | H]].
+    + left. left. apply H.
+    + left. right. apply H.
+    + right. apply H.
+  - intros [[H | H] | H].
+    + left. apply H.
+    + right. left. apply H.
+    + right. right. apply H. Qed.
+
+Lemma mult_03 : forall n m p, n * m * p = 0 <-> n = 0 \/ m = 0 \/ p = 0.
+Proof.
+  intros n m p. rewrite mult_0. rewrite mult_0. rewrite or_assoc.
+  reflexivity. Qed.
+
+Lemma apply_iff_example : forall n m : nat, n * m = 0 -> n = 0 \/ m = 0.
+Proof.
+  intros n m H. apply mult_0. apply H. Qed.
+
+Lemma four_is_even : exists n : nat, 4 = n + n.
+Proof.
+  exists 2. reflexivity. Qed.
+
+Theorem exists_example_2 : forall n,
+  (exists m, n = 4 + m) -> (exists o, n = 2 + o).
+Proof.
+  intros n [m Hm]. exists (2 + m). apply Hm. Qed.
+
+Theorem dist_not_exists : forall (X : Type) (P : X -> Prop),
+  (forall x, P x) -> ~ (exists x, ~ P x).
+Proof.
+  intros X P H1. unfold not. intros [x H2]. apply H2. apply H1. Qed.
+
+Theorem dist_exists_or : forall (X : Type) (P Q : X -> Prop),
+  (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
+Proof.
+  intros. split.
+  - intros [x [HP | HQ]].
+    + left. exists x. apply HP.
+    + right. exists x. apply HQ.
+  - intros [[x HP] | [x HQ]].
+    + exists x. left. apply HP.
+    + exists x. right. apply HQ. Qed.
 
