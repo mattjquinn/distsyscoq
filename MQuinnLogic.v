@@ -250,3 +250,38 @@ Proof.
   - apply not_true_is_false.
   - intros H. rewrite H. intros H'. inversion H'. Qed.
 
+Theorem iff_rel : forall P : Prop, P <-> P.
+Proof.
+  intros P. split.
+  - intros H. apply H.
+  - intros H. apply H. Qed.
+
+Theorem iff_trans : forall P Q R : Prop,
+  (P <-> Q) -> (Q <-> R) -> (P <-> R).
+Proof.
+  intros P Q R. split.
+  - destruct H. destruct H0. intros H3. apply H0. apply H. apply H3.
+  - destruct H. destruct H0. intros H3. apply H1. apply H2. apply H3. Qed.
+
+(* Got this one by myself, proving the reverse implication
+   (second case) stumped me for awhile but after applying
+   the nested intros destructor it all made sense. *)
+Theorem or_distributes_over_and : forall P Q R : Prop,
+  P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
+Proof.
+  intros P Q R. split.
+  - intros [HL | HR].
+    + { split.
+      - left. apply HL.
+      - left. apply HL. }
+    + { destruct HR. split. 
+      - right. apply H.
+      - right. apply H0. }
+  - intros [[HP1 | HQ][HP2 | HR]].
+    + (* P (and P) are true *) left. apply HP1.
+    + (* P and R are true *) left. apply HP1.
+    + (* P and Q are true *) left. apply HP2.
+    + (* Q and R are true *) right. { split.
+      - apply HQ.
+      - apply HR. } Qed.
+
