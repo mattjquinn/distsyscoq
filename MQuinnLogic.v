@@ -339,3 +339,65 @@ Proof.
     + exists x. left. apply HP.
     + exists x. right. apply HQ. Qed.
 
+Fixpoint In {A : Type} (x : A) (l : list A) : Prop :=
+  match l with
+  | [] => False
+  | x' :: l' => x' = x \/ In x l'
+  end.
+
+Example In_example_1 : In 4 [1; 2; 3; 4; 5].
+Proof.
+  simpl. right. right. right. left. reflexivity. Qed.
+
+Example In_example_2 : forall n, In n [2; 4] -> exists n', n = 2 * n'.
+Proof.
+  simpl. intros n [H | [H | []]].
+  - exists 1. rewrite <- H. reflexivity.
+  - exists 2. rewrite <- H. reflexivity. Qed.
+
+Lemma In_map : forall (A B : Type) (f : A -> B) (l : list A) (x : A),
+  In x l -> In (f x) (map f l).
+Proof.
+  intros A B f l x.
+  induction l as [| x' l' IHl'].
+  - simpl. intros [].
+  - simpl. intros [H | H].
+    + rewrite H. left. reflexivity.
+    + right. apply IHl'. apply H. Qed.
+
+Lemma In_map_iff : forall (A B : Type) (f: A->B) (l : list A) (y : B),
+  In y (map f l) <-> exists x, f x = y /\ In x l.
+Proof.
+  intros A B f l y. induction l as [| x' l' IHl']. split.
+  - simpl. intros H. exfalso. apply H.
+  - simpl. intros H. destruct H. inversion H. apply H1.
+  - split.
+    + simpl. rewrite IHl'. intros H. { destruct H.
+        - exists x'. split. apply H. left. reflexivity.
+        - destruct H. exists x. destruct H. split.
+          apply H. right. apply H0. }
+    + simpl. intros H. destruct H. inversion H.
+      (* When f x = y and x' = x, LHS will be true. *)
+      (* When f x = y and In x l', RHS will be true.*)
+      { destruct H1.
+        - left. rewrite H1. apply H0.
+        - right. apply IHl'. exists x. split. apply H0. apply H1. }
+Qed.
+
+Lemma in_app_iff : forall A l l' (a:A),
+  In a (l++l') <-> In a l \/ In a l'.
+Proof.
+  intros A l l' a. induction l.
+  - split.
+    + simpl. intros H. right. apply H.
+    + simpl. intros H. destruct H. destruct H. apply H.
+  - split.
+    + simpl. intros H. { destruct H.
+      - left. left. apply H.
+      - rewrite <- or_assoc. right. apply IHl. apply H. }
+    + simpl. intros H. { destruct H. 
+      - { destruct H.
+        + left. apply H.
+        + right. apply IHl. left. apply H. }
+      - right. apply IHl. right. apply H. } Qed.
+
