@@ -452,3 +452,85 @@ Theorem combine_odd_even_elim_even :
   combine_odd_even Podd Peven n -> oddb n = false -> Peven n.
 Proof.
   intros. unfold combine_odd_even in H. rewrite H0 in H. apply H. Qed.
+
+Check plus_comm.
+
+Lemma plus_comm3 : forall n m p, n + (m + p) = (p + m) + n.
+Proof.
+  intros n m p.
+  rewrite plus_comm.
+  rewrite plus_comm. Abort.
+
+Lemma plus_comm3_take2 :
+  forall n m p, n + (m + p) = (p + m) + n.
+Proof.
+  intros n m p.
+  rewrite plus_comm.
+  assert (H : m + p = p + m). {
+    rewrite plus_comm. reflexivity.
+  } rewrite H.
+  reflexivity. Qed.
+
+Lemma plus_comm3_take3 :
+  forall n m p, n + (m + p) = (p + m) + n.
+Proof.
+  intros n m p.
+  rewrite plus_comm.
+  rewrite (plus_comm m).
+  reflexivity. Qed.
+
+Example lemma_application_ex :
+  forall {n : nat} {ns : list nat},
+    In n (map (fun m => m * 0) ns) -> n = 0.
+Proof.
+  intros n ns H.
+  destruct (proj1 _ _ (In_map_iff _ _ _ _ _) H) as [m [Hm _]].
+  rewrite mult_0_r in Hm. rewrite <- Hm. reflexivity. Qed.
+
+Example function_equality_ex1 : plus 3 = plus (pred 4).
+Proof. reflexivity. Qed.
+
+Example function_equality_ex2 : (fun x => plus x 1) = (fun x => plus 1 x).
+Proof.
+Abort.
+
+Axiom functional_extensionality : forall {X Y : Type} {f g : X -> Y},
+  (forall (x : X), f x = g x) -> f = g.
+
+Example function_equality_ex2 : (fun x => plus x 1) = (fun x => plus 1 x).
+Proof.
+  apply functional_extensionality. intros x.
+  apply plus_comm. Qed.
+
+Print Assumptions function_equality_ex2.
+
+Fixpoint rev_append {X} (l1 l2 : list X) : list X :=
+  match l1 with
+  | [] => l2
+  | x :: l1' => rev_append l1' (x :: l2)
+  end.
+
+Definition tr_rev {X} (l : list X) : list X :=
+  rev_append l [].
+
+Lemma tr_rev_lemma1 :
+  forall (X : Type) (l1 l2 : list X),
+    rev_append l1 l2 = rev_append l1 [] ++ l2.
+Proof.
+  induction l1 as [|a l1].
+  + simpl. reflexivity.
+  + intros l2. simpl. rewrite (IHl1 [a]).
+    rewrite <- app_assoc. simpl. rewrite <- (IHl1 (a::l2)).
+    reflexivity. Qed.
+
+(* I got most of this solution, but stuck up to rewrite (IHl1 [a])
+   in the lemma above (used https://insight.io/github.com/sighingnow/amazing-coq/blob/HEAD/software-foundations/Logic.v
+   for help. After adding that in, I was able to get the rest.
+   I need more practice with applying theorems to arguments, i.e.,
+   rewrite (IHl1 [a]), rewrite (IHl1 (a::12)), etc. *)
+Lemma tr_rev_correct : forall X, @tr_rev X = @rev X.
+Proof.
+  intros. apply functional_extensionality. induction x as [| x l IHl].
+  - unfold tr_rev. simpl. reflexivity.
+  - simpl. rewrite <- IHl. unfold tr_rev. simpl.
+    apply tr_rev_lemma1. Qed.
