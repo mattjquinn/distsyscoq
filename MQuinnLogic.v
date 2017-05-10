@@ -523,7 +523,7 @@ Proof.
     rewrite <- app_assoc. simpl. rewrite <- (IHl1 (a::l2)).
     reflexivity. Qed.
 
-(* I got most of this solution, but stuck up to rewrite (IHl1 [a])
+(* I got most of this solution, but was stuck up to rewrite (IHl1 [a])
    in the lemma above (used https://insight.io/github.com/sighingnow/amazing-coq/blob/HEAD/software-foundations/Logic.v
    for help. After adding that in, I was able to get the rest.
    I need more practice with applying theorems to arguments, i.e.,
@@ -534,3 +534,85 @@ Proof.
   - unfold tr_rev. simpl. reflexivity.
   - simpl. rewrite <- IHl. unfold tr_rev. simpl.
     apply tr_rev_lemma1. Qed.
+
+Theorem evenb_double : forall k, evenb (double k) = true.
+Proof.
+  intros k. induction k as [| k' IHk'].
+  - reflexivity.
+  - simpl. apply IHk'. Qed.
+
+Theorem evenb_double_conv : forall n, exists k,
+  n = if evenb n then double k else S (double k).
+Proof.
+  intros n. induction n as [| n' IHn'].
+  - exists 0. reflexivity.
+  - rewrite evenb_S. destruct (evenb n').
+    + simpl. inversion IHn'. inversion H. exists x. reflexivity.
+    + simpl. inversion IHn'. rewrite H. exists (S x).
+      simpl. reflexivity. Qed.
+
+Theorem even_bool_prop : forall n,
+  evenb n = true <-> exists k, n = double k.
+Proof.
+  intros n. split.
+  - intros H. destruct (evenb_double_conv n) as [k Hk].
+    rewrite Hk. rewrite H. exists k. reflexivity.
+  - intros [k Hk]. rewrite Hk. apply evenb_double. Qed.
+
+Theorem beq_nat_true_iff : forall n1 n2 : nat,
+  beq_nat n1 n2 = true <-> n1 = n2.
+Proof.
+  intros n1 n2. split.
+  - apply beq_nat_true.
+  - intros H. rewrite H. rewrite <- beq_nat_refl. reflexivity.
+Qed.
+
+Fail Definition is_even_prime n :=
+  if n = 2 then true else false.
+
+Example even_1000 : exists k, 1000 = double k.
+Proof. exists 500. reflexivity. Qed.
+
+Example even_1000' : evenb 1000 = true.
+Proof. reflexivity. Qed.
+
+Example even_1000'' : exists k, 1000 = double k.
+Proof. apply even_bool_prop. reflexivity. Qed.
+
+Lemma andb_true_iff : forall b1 b2 : bool,
+  b1 && b2 = true <-> b1 = true /\ b2 = true.
+Proof.
+  intros. split.
+  - intros H. split.
+      + destruct b1. reflexivity. inversion H.
+      + destruct b2. reflexivity. destruct H. destruct b1.
+        reflexivity. reflexivity.
+  - intros [H1 H2]. rewrite H1. rewrite H2. reflexivity. Qed.
+
+Lemma orb_true_iff : forall b1 b2,
+  b1 || b2 = true <-> b1 = true \/ b2 = true.
+Proof.
+  intros. split.
+  - intros H. destruct b1.
+    + left. reflexivity.
+    + destruct b2. right. reflexivity. destruct H. left. reflexivity.
+  - intros [H1 | H2].
+    + rewrite H1. reflexivity.
+    + rewrite H2. apply or_true_is_true. Qed.
+
+Lemma beq_ident_contra: forall a : nat, ~beq_nat a a = false.
+Proof.
+  intros a. induction a.
+  - simpl. intros H. inversion H.
+  - simpl. apply IHa. Qed.
+
+Theorem beq_nat_false_iff : forall x y : nat,
+  beq_nat x y = false <-> x <> y.
+Proof.
+  intros. unfold not. split.
+  - intros H1 H2. rewrite H2 in H1. apply beq_ident_contra in H1.
+    destruct H1.
+    (* I got stuck up to the destruct below, had to search for help. *)
+  - intros H1. destruct (beq_nat x y) eqn:XEQY.
+    + apply beq_nat_true in XEQY. exfalso. apply H1. apply XEQY.
+    + reflexivity. Qed.
