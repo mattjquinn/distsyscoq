@@ -616,3 +616,60 @@ Proof.
   - intros H1. destruct (beq_nat x y) eqn:XEQY.
     + apply beq_nat_true in XEQY. exfalso. apply H1. apply XEQY.
     + reflexivity. Qed.
+
+Fixpoint beq_list {A : Type} (beq : A -> A -> bool)
+                             (l1 l2 : list A) : bool :=
+  match l1, l2 with
+  | [], [] => true
+  | _, [] | [], _ => false
+  | h1::t1, h2::t2 => beq h1 h2 && beq_list beq t1 t2
+  end.
+
+(* My original attempt. *)
+Lemma beq_list_true_iff : forall A (beq : A -> A -> bool),
+  (forall a1 a2, beq a1 a2 = true <-> a1 = a2) ->
+    forall l1 l2, beq_list beq l1 l2 = true <-> l1 = l2.
+Proof.
+  intros A beq H1. split.
+  - induction l1 as [| a1 l1].
+    + { destruct l2 as [| a2 l2].
+      - reflexivity.
+      - simpl. intros H. inversion H. }
+    + { induction l2 as [| a2 l2].
+      - simpl. intros H. inversion H.
+      - simpl. rewrite andb_true_iff. intros [H2 H3].
+        apply H1 in H2. rewrite H2.
+        (* How to get l1 equal to l2? *)
+Abort.
+
+(* I was able to start this one off well, but had to get help
+   with the last part. I need to remember to possibly delay splitting
+   an iff, and to use double induction if it makes sense. *)
+Lemma beq_list_true_iff : forall A (beq : A -> A -> bool),
+  (forall a1 a2, beq a1 a2 = true <-> a1 = a2) ->
+    forall l1 l2, beq_list beq l1 l2 = true <-> l1 = l2.
+Proof.
+  intros A beq H1. (* MISTAKE1: Splitting now, instead of in each subcase. *)
+  induction l1 as [| a l1 IHl1].
+    - destruct l2 as [| b l2].
+      + split.
+        * reflexivity.
+        * reflexivity.
+      + simpl. split. 
+        * intros H. inversion H.
+        * intros H. inversion H.
+    - induction l2 as [| b l2].
+      + simpl. split.
+        * intros H. inversion H.
+        * intros H. inversion H.
+      + simpl. split.
+        * rewrite andb_true_iff. intros [H2 H3].
+          apply H1 in H2.
+          (* MISTAKE2: Not being able to apply the first induction
+             hypothesis to H3 as done in the next step: *)
+          apply IHl1 in H3. rewrite H2. rewrite H3.
+          reflexivity.
+        * intros H. rewrite andb_true_iff. { split.
+          - apply H1. inversion H. reflexivity.
+          - apply IHl1. inversion H. reflexivity. }
+Qed.
