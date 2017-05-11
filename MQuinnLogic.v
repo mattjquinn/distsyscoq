@@ -673,3 +673,15 @@ Proof.
           - apply H1. inversion H. reflexivity.
           - apply IHl1. inversion H. reflexivity. }
 Qed.
+
+Theorem forallb_true_iff : forall X test (l : list X),
+  forallb test l = true <-> All (fun x => test x = true) l.
+Proof.
+  intros X test l. induction l as [| x l].
+  - simpl. split.
+    + intros H. apply I.
+    + intros H. reflexivity.
+  - simpl. split.
+    + rewrite andb_true_iff. rewrite IHl. intros H. apply H.
+    + rewrite andb_true_iff. rewrite IHl. intros H. apply H.
+Qed.
