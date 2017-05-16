@@ -92,3 +92,33 @@ Proof.
   - apply ev_even.
   - intros [k Hk]. rewrite Hk. apply ev_double. Qed.
 
+Theorem ev_sum : forall n m, ev n -> ev m -> ev (n + m).
+Proof.
+  intros n m H1 H2. induction H1 as [| n' E' IH].
+  - simpl. apply H2.
+  - simpl. apply ev_SS. apply IH. Qed.
+
+Inductive ev' : nat -> Prop :=
+  | ev'_0 : ev' 0
+  | ev'_2 : ev' 2
+  | ev'_sum : forall n m, ev' n -> ev' m -> ev' (n + m).
+
+Theorem ev'_ev : forall n, ev' n <-> ev n.
+Proof.
+  intros n. split.
+  - intros E. induction E.
+    + apply ev_0.
+    + apply ev_SS. apply ev_0.
+    + apply ev_sum.
+      * apply IHE1.
+      * apply IHE2.
+  - intros E. induction E.
+    + apply ev'_0.
+    + assert (H1 : S (S n) = n + 2). {
+        rewrite <- plus_1_l. rewrite plus_comm. rewrite <- plus_1_l.
+        rewrite <- plus_assoc. rewrite plus_comm. rewrite <- plus_assoc.
+        simpl. reflexivity. }
+      rewrite H1. apply ev'_sum.
+      * apply IHE.
+      * apply ev'_2.
+Qed. (* Got this one by myself. *)
