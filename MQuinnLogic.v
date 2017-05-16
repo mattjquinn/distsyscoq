@@ -685,3 +685,60 @@ Proof.
     + rewrite andb_true_iff. rewrite IHl. intros H. apply H.
     + rewrite andb_true_iff. rewrite IHl. intros H. apply H.
 Qed.
+
+Definition excluded_middle := forall P : Prop, P \/ ~P.
+
+Theorem restricted_excluded_middle : forall P b,
+  (P <-> b = true) -> P \/ ~P.
+Proof.
+  intros P [] H.
+  - left. apply H. reflexivity.
+  - right. rewrite H. intros contra. inversion contra.
+Qed.
+
+Theorem restricted_excluded_middle_eq : forall (n m : nat),
+  n = m \/ n <> m.
+Proof.
+  intros n m.
+  apply (restricted_excluded_middle (n = m) (beq_nat n m)).
+  symmetry.
+  apply beq_nat_true_iff.
+Qed.
+
+Theorem excluded_middle_irrefutable : forall (P : Prop),
+  ~~(P \/ ~P).
+Proof.
+  intros P. unfold not. intros H. apply H.
+  right. intros H1. apply H. left. apply H1. Qed.
+
+Theorem not_exists_dist :
+  excluded_middle -> forall (X : Type) (P : X -> Prop),
+    ~ (exists x, ~ P x) -> (forall x, P x).
+Proof.
+  (* Forgot to unfold first. *)
+  unfold excluded_middle. intros EM X P H1 x.
+  (* Was trying to use apply (EM (P x)), should have been using
+     destruct with appropriate destructive branches. *)
+  destruct (EM (P x)) as [LHS | RHS].
+  - apply LHS.
+  - unfold not in H1. exfalso. apply H1.
+    exists x. apply RHS. Qed.
+
+Definition peirce := forall P Q : Prop,
+  ((P -> Q) -> P) -> P.
+
+Definition double_negation_elimination := forall P : Prop,
+  ~~P -> P.
+
+Definition de_morgan_not_and_not := forall P Q : Prop,
+  ~(~P /\ ~Q) -> P \/ Q.
+
+Definition implies_to_or := forall P Q : Prop,
+  (P -> Q) -> (~P \/ Q).
+
+Theorem classical_axioms1 : excluded_middle <-> peirce.
+Proof.
+  unfold excluded_middle. unfold peirce. split.
+  (* Don't have the motivation/brainpower to do these right now,
+     aborting for now. *)
+  Abort.
