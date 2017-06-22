@@ -77,7 +77,7 @@ Proof.
   - simpl. assert (I: (exists k', n' = double k') ->
                       (exists k, S (S n') = double k)).
     { intros [k' Hk']. rewrite Hk'. exists (S k'). reflexivity. }
-    apply I. Admitted.
+    apply I. Abort.
 
 Lemma ev_even : forall n, ev n -> exists k, n = double k.
 Proof.
@@ -122,3 +122,125 @@ Proof.
       * apply IHE.
       * apply ev'_2.
 Qed. (* Got this one by myself. *)
+
+Theorem ev_ev__ev : forall n m,
+  ev (n + m) -> ev n -> ev m.
+Proof.
+  intros n m E1 E2. induction E2.
+  - simpl in E1. apply E1.
+  - apply IHE2. inversion E1. apply H0. Qed.
+
+Theorem ev_plus_plus : forall n m p,
+  ev (n + m) -> ev (n + p) -> ev (m + p).
+Proof.
+  intros n m p H1 H2.
+  apply ev_sum with (n := n + m) (m := n + p) in H1.
+  replace (n + m + (n + p)) with ((n + n) + (m + p)) in H1.
+  apply ev_ev__ev with (n:=n + n) (m:=m + p) in H1.
+  - apply H1.
+  - apply ev_sum.
+Abort. (* Unable to solve this one right now. *)
+
+Module Playground.
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n : forall n, le n n
+  | le_S : forall n m, (le n m) -> (le n (S m)).
+
+Notation "m <= n" := (le m n).
+
+Theorem test_le1 : 3 <= 3.
+Proof. apply le_n. Qed.
+
+Theorem test_le2 : 3 <= 6.
+Proof. apply le_S. apply le_S. apply le_S. apply le_n. Qed.
+
+Theorem test_le3 : (2 <= 1) -> 2 + 2 = 5.
+Proof. intros H. inversion H. inversion H2. Qed.
+
+End Playground.
+
+Definition lt (n m : nat) := le (S n) m.
+
+Notation "m < n" := (lt m n).
+
+Inductive square_of : nat -> nat -> Prop :=
+  | sq : forall n : nat, square_of n (n * n).
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn : forall n : nat, next_nat n (S n).
+
+Inductive next_even : nat -> nat -> Prop :=
+  | ne_1 : forall n, ev (S n) -> next_even n (S n)
+  | ne_2 : forall n, ev (S (S n)) -> next_even n (S (S n)).
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | tr_1 : forall n m, total_relation n m
+  | tr_2 : forall m n, total_relation m n.
+
+Definition empty_relation (n m : nat) := ~total_relation n m.
+
+Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
+Proof.
+  intros m n o H1 H2. induction H2.
+  - apply H1.
+  - apply le_S. apply IHle. Qed.
+
+Theorem O_le_n : forall n, 0 <= n.
+Proof.
+  intros n. induction n.
+  - apply le_n.
+  - apply le_S. apply IHn. Qed.
+
+Theorem n_le_m__Sn_le_Sm : forall n m,
+  n <= m -> S n <= S m.
+Proof.
+  intros m n H. induction H.
+  - apply le_n.
+  - apply le_S. apply IHle. Qed.
+
+Theorem Sn_le_Sm__n_le_m : forall n m,
+  S n <= S m -> n <= m.
+Proof.
+  intros n m H. induction m.
+  - inversion H.
+    + apply le_n.
+    + inversion H1.
+  - inversion H.
+    + apply le_n.
+    + apply le_S. apply IHm. apply H1. Qed.
+
+Theorem le_plus_l : forall a b, a <= a + b.
+Proof.
+  intros a b. induction b.
+  - rewrite <- plus_n_0. apply le_n.
+  - rewrite <- plus_n_Sm. apply le_S. apply IHb. Qed.
+
+Theorem plus_lt : forall n1 n2 m, n1 + n2 < m -> n1 < m /\ n2 < m.
+Proof.
+  unfold lt. intros n1 n2 m H. split.
+  + induction H.
+    - rewrite plus_comm. rewrite plus_n_Sm. rewrite plus_comm.
+      apply le_plus_l.
+    - apply le_S. apply IHle.
+  + induction H.
+    - rewrite plus_n_Sm. rewrite plus_comm. apply le_plus_l.
+    - apply le_S. apply IHle.
+Qed. (* Finally got this myself, good example of induction on hypothesis. *)
+
+Theorem lt_S : forall n m, n < m -> n < S m.
+Proof.
+  unfold lt. intros n m H. apply le_S in H. apply H.
+Qed.
+
+Theorem leb_complete : forall n m, leb n m = true -> n <= m.
+Proof.
+  intros n m. destruct n.
+  + destruct m.
+    - intros H. apply le_n.
+    - intros H. apply le_S. apply O_le_n.
+  + induction m.
+    - intros H. inversion H.
+    - simpl. intros H. apply le_S. apply IHm.
+      
+
