@@ -235,12 +235,35 @@ Qed.
 
 Theorem leb_complete : forall n m, leb n m = true -> n <= m.
 Proof.
-  intros n m. destruct n.
-  + destruct m.
-    - intros H. apply le_n.
-    - intros H. apply le_S. apply O_le_n.
-  + induction m.
-    - intros H. inversion H.
-    - simpl. intros H. apply le_S. apply IHm.
-      
+  intros n. (* NOTICE: m not being introduced, it must be kept
+      general, otherwise you will not be able to apply IHn at the end. *)
+  induction n.
+  - induction m as [| m' IHm'].
+    + intros H. apply le_n.
+    + intros H. apply le_S. apply IHm'.
+      (* This is the tricky part. If you look at the definition of
+         le above, by the second constructor we know that if we have
+         leb 0 m' = true, it follows that leb 0 (S m') is also true; this
+         is true by assumption (hypothesis H). *)
+      apply H.
+  - induction m as [| m' IHm'].
+    + simpl. intros H. inversion H.
+    + simpl. intros H. apply n_le_m__Sn_le_Sm. apply IHn. apply H. Qed.
 
+Theorem leb_correct : forall n m, n <= m -> leb n m = true.
+Proof.
+  intros. 
+
+Theorem leb_true_trans : forall n m o,
+  leb n m = true -> leb m o = true -> leb n o = true.
+Proof.
+  intros n m o H1 H2. apply leb_complete in H1.
+  apply leb_complete in H2. apply leb_correct.
+  generalize dependent H2. generalize dependent H1.
+  apply le_trans. Qed.
+
+Theorem leb_iff : forall n m, leb n m = true <-> n <= m.
+Proof.
+  split.
+  - apply leb_complete.
+  - apply leb_correct. Qed.
