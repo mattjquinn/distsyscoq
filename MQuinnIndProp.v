@@ -252,7 +252,15 @@ Proof.
 
 Theorem leb_correct : forall n m, n <= m -> leb n m = true.
 Proof.
-  intros. 
+  intros.
+  (* NOTICE: You must keep n general, otherwise you won't be able
+     to apply IHm' at the end. *)
+  generalize dependent n. 
+  induction m as [| m' IHm'].
+  - intros n H. inversion H. symmetry. apply leb_refl.
+  - intros n H. induction n as [| n' IHn'].
+    + reflexivity.
+    + simpl. apply IHm'. apply Sn_le_Sm__n_le_m in H. apply H. Qed.
 
 Theorem leb_true_trans : forall n m o,
   leb n m = true -> leb m o = true -> leb n o = true.
