@@ -276,3 +276,60 @@ Proof.
   - apply leb_complete.
   - apply leb_correct.
 Qed.
+
+Lemma Sn_eq_Sm__n_eq_m : forall n m : nat, S n = S m -> n = m.
+Proof.
+  intros. induction n as [| n' IHn'].
+  - inversion H. reflexivity.
+  - inversion H. reflexivity. Qed.
+
+Module R.
+
+Inductive R : nat -> nat -> nat -> Prop :=
+  | c1 : R 0 0 0
+  | c2 : forall m n o, R m n o -> R (S m) n (S o)
+  | c3 : forall m n o, R m n o -> R m (S n) (S o)
+  | c4 : forall m n o, R (S m) (S n) (S (S o)) -> R m n o
+  | c5 : forall m n o, R m n o -> R n m o.
+
+Example R_ex1 : R 1 1 2.
+Proof. apply c2. apply c3. apply c1. Qed.
+
+Example R_ex2 : R 2 2 6.
+Proof. apply c2. apply c3. apply c2. apply c3.
+       (* Not provable. *) Abort.
+
+(* If we dropped c5, the set of provable propositions would not change;
+   any reduction of o also involves a reduction of m (c2) or n (c3). *)
+
+(* If we dropped c4, the set of provable propositions would not change;
+   it increases m, n, and o rather than decreasing them towards 0. *)
+
+Definition fR : nat -> nat -> nat := plus.
+
+Theorem R_equiv_fR : forall m n o, R m n o <-> fR m n = o.
+Proof.
+  intros m n o. split.
+  - intros H. induction H.
+    + reflexivity.
+    + simpl. rewrite IHR. reflexivity.
+    + unfold fR. rewrite <- plus_n_Sm. fold fR.
+      rewrite IHR. reflexivity.
+    + simpl in IHR. unfold fR in IHR. rewrite <- plus_n_Sm in IHR.
+      fold fR in IHR. apply Sn_eq_Sm__n_eq_m in IHR.
+      apply Sn_eq_Sm__n_eq_m in IHR. apply IHR.
+    + unfold fR. unfold fR in IHR. rewrite plus_comm. apply IHR.
+  - generalize dependent n. generalize dependent m.
+    induction o as [| o' IHo'].
+    + intros m n H. unfold fR in H. Search plus.
+      apply and_exercise in H. destruct H as [HA HB].
+      rewrite HA. rewrite HB. apply c1.
+    + intros m n H. destruct m.
+      * { destruct n.
+          - inversion H.
+          - apply c3. apply IHo'. inversion H. reflexivity. }
+      * apply c2. apply IHo'. inversion H. reflexivity.
+Qed.
+
+End R.
+
