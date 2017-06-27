@@ -321,7 +321,7 @@ Proof.
     + unfold fR. unfold fR in IHR. rewrite plus_comm. apply IHR.
   - generalize dependent n. generalize dependent m.
     induction o as [| o' IHo'].
-    + intros m n H. unfold fR in H. Search plus.
+    + intros m n H. unfold fR in H.
       apply and_exercise in H. destruct H as [HA HB].
       rewrite HA. rewrite HB. apply c1.
     + intros m n H. destruct m.
@@ -333,3 +333,49 @@ Qed.
 
 End R.
 
+Inductive subseq : list nat -> list nat -> Prop :=
+  | s1 : forall l, subseq [] l
+  | s2 : forall a t1 t2, subseq t1 t2 -> subseq (a :: t1) (a :: t2)
+  | s3 : forall a l1 t2, subseq l1 t2 -> subseq l1 (a :: t2).
+
+Example subseq_test1 : subseq [1;2;3] [1;2;3].
+Proof. apply s2. apply s2. apply s2. apply s1. Qed.
+Example subseq_test2 : subseq [1;2;3] [1;1;1;2;2;3].
+Proof. apply s2. apply s3. apply s3. apply s2. apply s3. apply s2.
+       apply s1. Qed.
+Example subseq_test3 : subseq [1;2;3] [1;2;7;3].
+Proof. apply s2. apply s2. apply s3. apply s2. apply s1. Qed.
+Example subseq_test4 : subseq [1;2;3] [5;6;1;9;9;2;7;3;8].
+Proof. apply s3. apply s3. apply s2. apply s3.
+       apply s3. apply s2. apply s3. apply s2. apply s1. Qed.
+
+Example subseq_fail1 : subseq [1;2;3] [1;2].
+Proof. apply s2. apply s2. Abort.
+Example subseq_fail2 : subseq [1;2;3] [1;3].
+Proof. apply s2. apply s3. Abort.
+Example subseq_fail3 : subseq [1;2;3] [5;6;2;1;7;3;8].
+Proof. apply s3. apply s3. apply s3. apply s2.
+       apply s3. apply s3. apply s3. Abort.
+
+Theorem subseq_refl : forall l : list nat, subseq l l.
+Proof.
+  intros l. induction l.
+  - apply s1.
+  - apply s2. apply IHl.
+Qed.
+
+Theorem subseq_app : forall l1 l2 l3, subseq l1 l2 -> subseq l1 (l2 ++ l3).
+Proof.
+  intros. induction H.
+    (* By inducting on H, we aim to show that for each of the 3
+       inductive constructors, appending an arbitrary list l3 to the
+       second list does not change the fact that l1 is still a subseq. *)
+  - apply s1.
+  - simpl. apply s2. apply IHsubseq.
+  - simpl. apply s3. apply IHsubseq.
+Qed.
+
+Theorem subseq_trans : forall l1 l2 l3,
+  subseq l1 l2 -> subseq l2 l3 -> subseq l1 l3.
+Proof.
+  
