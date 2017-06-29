@@ -393,3 +393,20 @@ Qed. (* I got this by myself, but I have only a vague idea of why/how it
         (with induction H2), then once more in the second
         (with inversion H1), a "full analysis" is possible. *)
 
+Inductive R : nat -> list nat -> Prop :=
+  | c1 : R 0 []
+  | c2 : forall n l, R n l -> R (S n) (n :: l)
+  | c3 : forall n l, R (S n) l -> R n l.
+
+Example Rprov_ex1 : R 2 [1;0].
+Proof. apply c2. apply c2. apply c1. Qed.
+Example Rprov_ex2 : R 1 [1;2;1;0].
+Proof. apply c3. apply c2. apply c3. apply c3. apply c2.
+       apply c2. apply c2. apply c1. Qed.
+Example Rprov_ex3 : R 6 [3;2;1;0].
+Proof. Abort.
+(* Propositions 1 and 2 are provable, because n is less than or equal to
+   (list_head + 1) at all times. In Proposition 3 n is greater than
+   (list_head + 1), and since there is no rule allowing us to reduce n
+   independently of modifying the list, R does not hold. *)
+
