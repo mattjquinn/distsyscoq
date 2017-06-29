@@ -378,4 +378,18 @@ Qed.
 Theorem subseq_trans : forall l1 l2 l3,
   subseq l1 l2 -> subseq l2 l3 -> subseq l1 l3.
 Proof.
-  
+  intros l1 l2 l3 H1 H2. generalize dependent l1. induction H2.
+  - intros l1 H1. inversion H1. apply s1.
+  - intros l1 H1. 
+    (* Here, H2: subseq t1 t2 links IHsubseq: subseq l1 t1 -> subseq l1 t2
+       together, so to speak. *)
+    inversion H1. (* Now we break apart the possibilities for l1. *)
+    + apply s1.
+    + apply s2. apply IHsubseq. apply H3.
+    + apply s3. apply IHsubseq. apply H3.
+  - intros. apply s3. apply IHsubseq. apply H1.
+Qed. (* I got this by myself, but I have only a vague idea of why/how it
+        works; by breaking up each inductive definition case
+        (with induction H2), then once more in the second
+        (with inversion H1), a "full analysis" is possible. *)
+
