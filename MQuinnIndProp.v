@@ -499,3 +499,44 @@ Proof.
     + apply H. simpl. left. reflexivity.
     + apply IHss. intros. apply H. simpl. right. apply H0.
 Qed.
+
+Lemma x_l1_x_l2__eq__l1_l2 : forall T (x : T) (l1 l2 : list T),
+  x :: l1 = x :: l2 <-> l1 = l2.
+Proof.
+  intros T x l1 l2. split.
+  - generalize dependent l2. induction l1.
+    + intros l2 H. inversion H. reflexivity.
+    + intros l2 H. inversion H. reflexivity.
+  - generalize dependent l2. induction l1.
+    + intros l2 H. inversion H. reflexivity.
+    + intros l2 H. inversion H. reflexivity.
+Qed.
+
+Lemma x_hd_l_tl__eq__xl_app_tll : forall T (x : T) (l : list T),
+  x :: l = [x] ++ l.
+Proof.
+  intros. induction l.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
+
+Lemma reg_exp_of_list_spec : forall T (s1 s2 : list T),
+  s1 =~ reg_exp_of_list s2 <-> s1 = s2.
+Proof.
+  intros T s1 s2. split.
+  - generalize dependent s1. induction s2.
+    + simpl. intros. inversion H. reflexivity.
+    + simpl. intros. (* Got stuck here. *)  inversion H. inversion H3.
+      simpl. apply x_l1_x_l2__eq__l1_l2. apply IHs2. apply H4.
+  - generalize dependent s1. induction s2.
+    + simpl. intros. inversion H. apply MEmpty.
+    + simpl. intros. rewrite H. rewrite x_hd_l_tl__eq__xl_app_tll.
+      apply MApp.
+      * apply MChar.
+      * apply IHs2. reflexivity.
+Qed. (* I got most of this by myself, but had to get help when I got
+        stuck before inverting on H then H3 above. Moral of the story:
+        look at all the inversion evidence carefully to see if further
+        inverting will yield useful evidence / goal. I was overwhelmed
+        by all the generated hypotheses here originally and thought it
+        was a dead-end, and thus didn't continue down that route. *)
