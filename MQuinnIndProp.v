@@ -624,3 +624,45 @@ Proof.
         exists s2. apply MUnionR. apply IHre2.
     + exists []. apply MStar0.
 Qed.
+
+Lemma star_app: forall T (s1 s2 : list T) (re : reg_exp T),
+  s1 =~ Star re -> s2 =~ Star re -> s1 ++ s2 =~ Star re.
+Proof.
+  intros T s1 s2 re H1.
+  induction H1
+    as [|x'|s1 re1 s2' re2 Hmatch1 IH1 Hmatch2 IH2
+        |s1 re1 re2 Hmatch IH | re1 s2' re2 Hmatch IH
+        |re''|s1 s2' re'' Hmatch1 IH1 Hmatch2 IH2].
+  - simpl. intros. assumption.
+  - simpl. intros. Abort.
+
+Lemma star_app : forall T (s1 s2 : list T) (re re' : reg_exp T),
+  s1 =~ re' -> re' = Star re -> s2 =~ Star re -> s1 ++ s2 =~ Star re.
+Proof.
+  intros T s1 s2 re re' H1 H2.
+  induction H1
+    as [|x'|s1 re1 s2' re2 Hmatch1 IH1 Hmatch2 IH2
+        |s1 re1 re2 Hmatch IH | re1 s2' re2 Hmatch IH
+        |re''|s1 s2' re'' Hmatch1 IH1 Hmatch2 IH2].
+  - intros. assumption.
+  - inversion H2.
+  - inversion H2.
+  - inversion H2.
+  - Abort. (* Rather than doing this, use the remember tactic. *)
+
+Lemma star_app : forall T (s1 s2 : list T) (re : reg_exp T),
+  s1 =~ Star re -> s2 =~ Star re -> s1 ++ s2 =~ Star re.
+Proof.
+  intros T s1 s2 re H1.
+  remember (Star re) as re'.
+  generalize dependent s2.
+  induction H1
+    as [|x'|s1 re1 s2' re2 Hmatch1 IH1 Hmatch2 IH2
+        |s1 re1 re2 Hmatch IH|re1 s2' re2 Hmatch IH
+        |re''|s1 s2' re'' Hmatch1 IH1 Hmatch2 IH2].
+  - inversion Heqre'.
+  - inversion Heqre'.
+  - inversion Heqre'.
+  - inversion Heqre'.
+  - inversion Heqre'.
+  - 
