@@ -540,3 +540,87 @@ Qed. (* I got most of this by myself, but had to get help when I got
         inverting will yield useful evidence / goal. I was overwhelmed
         by all the generated hypotheses here originally and thought it
         was a dead-end, and thus didn't continue down that route. *)
+
+Fixpoint re_chars {T} (re : reg_exp T) : list T :=
+  match re with
+  | EmptySet => []
+  | EmptyStr => []
+  | Char x => [x]
+  | App re1 re2 => re_chars re1 ++ re_chars re2
+  | Union re1 re2 => re_chars re1 ++ re_chars re2
+  | Star re => re_chars re
+  end.
+
+Theorem in_re_match : forall T (s : list T) (re : reg_exp T) (x : T),
+  s =~ re -> In x s -> In x (re_chars re).
+Proof.
+  intros T s re x Hmatch Hin.
+  induction Hmatch
+    as [
+        |x'
+        |s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        |s1 re1 re2 Hmatch IH
+        |re1 s2 re2 Hmatch IH
+        |re
+        |s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  - inversion Hin.
+  - apply Hin.
+  - simpl. rewrite in_app_iff in *.
+    destruct Hin as [Hin | Hin].
+    + left. apply (IH1 Hin).
+    + right. apply (IH2 Hin).
+  - simpl. rewrite in_app_iff. left. apply (IH Hin).
+  - simpl. rewrite in_app_iff. right. apply (IH Hin).
+  - destruct Hin.
+  - (* NOTICE HERE: TWO induction hypotheses are generated,
+       the second one useful in proving In xs2 for the recursive case. *)
+    simpl. rewrite in_app_iff in Hin.
+    destruct Hin as [Hin | Hin].
+    + apply (IH1 Hin).
+    + apply (IH2 Hin).
+Qed.
+
+Fixpoint re_not_empty {T : Type} (re : reg_exp T) : bool :=
+  match re with
+  | EmptySet => false
+  | EmptyStr => true
+  | Char _ => true
+  | App re1 re2 => re_not_empty re1 && re_not_empty re2
+  | Union re1 re2 => re_not_empty re1 || re_not_empty re2
+  | Star re' => true
+  end.
+
+Lemma re_not_empty_correct : forall T (re : reg_exp T),
+  (exists s, s =~ re) <-> re_not_empty re = true.
+Proof.
+  intros T re. split.
+  - intros H. inversion H. induction H0.
+    + reflexivity.
+    + reflexivity.
+    + simpl. apply andb_true_iff. split.
+      * apply IHexp_match1. exists s4. apply H0_.
+      * apply IHexp_match2. exists s5. apply H0_0.
+    + simpl. apply orb_true_iff. left. apply IHexp_match.
+      exists s4. apply H0.
+    + simpl. apply orb_true_iff. right. apply IHexp_match.
+      exists s4. apply H0.
+    + reflexivity.
+    + apply IHexp_match2. exists s5. apply H0_0.
+  - intros H. induction re.
+    + inversion H.
+    + exists []. apply MEmpty.
+    + exists [t]. apply MChar.
+    + inversion H. apply andb_true_iff in H1.
+      destruct H1 as [H1A H1B].
+      destruct IHre1 as [s1 IHre1]. apply H1A.
+      destruct IHre2 as [s2 IHre2]. apply H1B.
+      exists (s1 ++ s2). apply MApp.
+      apply IHre1. apply IHre2.
+    + inversion H. apply orb_true_iff in H1.
+      destruct H1 as [| H1A H1B].
+      * destruct IHre1 as [s1 IHre1]. apply H0.
+        exists s1. apply MUnionL. apply IHre1.
+      * destruct IHre2 as [s2 IHre2]. apply H1A.
+        exists s2. apply MUnionR. apply IHre2.
+    + exists []. apply MStar0.
+Qed.
