@@ -756,6 +756,11 @@ Proof.
   - simpl. rewrite <- app_assoc. rewrite IHn. reflexivity.
 Qed.
 
+Lemma pumping_lem1 : forall T (re1 re2 : reg_exp T) (s1 s2 : list T),
+  pumping_constant re1 + pumping_constant re2 <= length (s1 ++ s2) ->
+  pumping_constant re1 <= length s1 /\ pumping_constant re2 <= length s2.
+Admitted.
+
 Lemma pumping : forall T (re : reg_exp T) s,
   s =~ re ->
   pumping_constant re <= length s ->
@@ -763,3 +768,24 @@ Lemma pumping : forall T (re : reg_exp T) s,
     s = s1 ++ s2 ++ s3 /\
     s2 <> [] /\
     forall m, s1 ++ napp m s2 ++ s3 =~ re.
+Proof.
+Require Import Coq.omega.Omega.
+  intros T re s Hmatch. induction Hmatch.
+  - simpl. omega.
+  - simpl. omega.
+  - simpl. intros H. apply pumping_lem1 in H as [Hlen1 Hlen2].
+    specialize (IHHmatch1 Hlen1). specialize (IHHmatch2 Hlen2).
+    destruct IHHmatch1 as [a1 [a2 [a3 [IHH1A [IHH1B IHH1C]]]]].
+    destruct IHHmatch2 as [b1 [b2 [b3 [IHH2A [IHH2B IHH2C]]]]].
+    exists a1, a2, (a3 ++ b1 ++ b2 ++ b3). split.
+    + rewrite IHH1A. rewrite <- app_assoc. rewrite <- app_assoc.
+      rewrite IHH2A. reflexivity.
+    + split.
+      * apply IHH1B.
+      * intros m. rewrite <- IHH2A. Search list.
+        rewrite app_assoc. rewrite app_assoc.
+        { apply (MApp ((a1 ++ (napp m a2)) ++ a3) re1 s2 re2).
+          - rewrite <- app_assoc. apply IHH1C.
+          - apply Hmatch2. }
+  - 
+End Pumping.
