@@ -648,6 +648,8 @@ Proof.
   - inversion H2.
   - inversion H2.
   - inversion H2.
+  - inversion H2.
+  - simpl. intros. assumption.
   - Abort. (* Rather than doing this, use the remember tactic. *)
 
 Lemma star_app : forall T (s1 s2 : list T) (re : reg_exp T),
@@ -665,4 +667,68 @@ Proof.
   - inversion Heqre'.
   - inversion Heqre'.
   - inversion Heqre'.
-  - 
+  - simpl. intros. assumption.
+  - inversion Heqre'. rewrite H0 in IH2, Hmatch1.
+    intros s2 H1. rewrite <- app_assoc. apply MStarApp.
+    + apply Hmatch1.
+    + apply IH2.
+      * reflexivity.
+      * apply H1.
+Qed.
+
+Lemma s_match___s_match_star_re : forall T (s : list T) (re : reg_exp T),
+  s =~ Star re -> s =~ EmptyStr \/ s =~ re.
+Proof.
+  intros T s re H1. Admitted.
+
+Lemma MStar'' : forall T (s : list T) (re : reg_exp T),
+    s =~ Star re ->
+    exists ss : list (list T),
+      s = fold app ss []
+      /\ forall s', In s' ss -> s' =~ re.
+Proof.
+  intros T s re H. remember (Star re) as re'. induction H.
+  inversion Heqre'.
+  inversion Heqre'.
+  inversion Heqre'.
+  inversion Heqre'.
+  inversion Heqre'.
+  inversion Heqre'. exists []. simpl. intuition.
+  specialize (IHexp_match2 Heqre'). destruct IHexp_match2 as [ss IHx]. 
+  destruct IHx. exists (s4:: ss). split.
+  simpl. rewrite H1. reflexivity.
+ intros s' Hin. simpl in Hin. destruct Hin. congruence.
+Abort.
+
+Lemma MStar'' : forall T (s : list T) (re : reg_exp T),
+  s =~ Star re -> exists ss : list (list T),
+    s = fold app ss [] /\ forall s', In s' ss -> s' =~ re.
+Proof.
+  intros T s re H1. remember (Star re) as re'. induction H1.
+  - inversion Heqre'.
+  - inversion Heqre'.
+  - inversion Heqre'.
+  - inversion Heqre'.
+  - inversion Heqre'.
+  - inversion Heqre'. exists []. simpl. split.
+    + reflexivity.
+    + intros. inversion H.
+  - (* Stuck in this case, had to seek help elsewhere. *)
+    specialize (IHexp_match2 Heqre').
+    (* Didn't know how to use specialize before, this is useful. *)
+    destruct IHexp_match2 as [ss [IHxa IHxb]].
+    (* This I had originally, but in a later step. Apparently too late. *)
+    exists (s4 :: ss).
+    (* This was my biggest mistake. I was trying to say that (s4 :: s5)
+       exists; easily got the s4 case, but wasn't able to prove for s5. *)
+    split.
+    + simpl. rewrite IHxa. reflexivity.
+    + simpl. intros s' Hin. destruct Hin.
+      * rewrite <- H. inversion Heqre'. rewrite <- H1. apply H1_.
+        (* Apparently this can all be done with just the congruence
+           tactic, but I can't figure out exactly how it works. *)
+      * apply IHxb. apply H.
+        (* This makes me feel dumb; only two tactics applied, whereas
+           my attempts spanned 4 or 5 entire lines. I think all the problems
+           stemmed from my using exists (s4 :: s5) instead of (s4 :: ss). *)
+Qed.
