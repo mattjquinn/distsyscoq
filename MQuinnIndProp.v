@@ -334,34 +334,36 @@ Qed.
 End R.
 
 Inductive subseq : list nat -> list nat -> Prop :=
-  | s1 : forall l, subseq [] l
-  | s2 : forall a t1 t2, subseq t1 t2 -> subseq (a :: t1) (a :: t2)
-  | s3 : forall a l1 t2, subseq l1 t2 -> subseq l1 (a :: t2).
+  | subseq1 : forall l, subseq [] l
+  | subseq2 : forall a t1 t2, subseq t1 t2 -> subseq (a :: t1) (a :: t2)
+  | subseq3 : forall a l1 t2, subseq l1 t2 -> subseq l1 (a :: t2).
 
 Example subseq_test1 : subseq [1;2;3] [1;2;3].
-Proof. apply s2. apply s2. apply s2. apply s1. Qed.
+Proof. apply subseq2. apply subseq2. apply subseq2. apply subseq1. Qed.
 Example subseq_test2 : subseq [1;2;3] [1;1;1;2;2;3].
-Proof. apply s2. apply s3. apply s3. apply s2. apply s3. apply s2.
-       apply s1. Qed.
+Proof. apply subseq2. apply subseq3. apply subseq3. apply subseq2.
+       apply subseq3. apply subseq2. apply subseq1. Qed.
 Example subseq_test3 : subseq [1;2;3] [1;2;7;3].
-Proof. apply s2. apply s2. apply s3. apply s2. apply s1. Qed.
+Proof. apply subseq2. apply subseq2. apply subseq3.
+       apply subseq2. apply subseq1. Qed.
 Example subseq_test4 : subseq [1;2;3] [5;6;1;9;9;2;7;3;8].
-Proof. apply s3. apply s3. apply s2. apply s3.
-       apply s3. apply s2. apply s3. apply s2. apply s1. Qed.
+Proof. apply subseq3. apply subseq3. apply subseq2. apply subseq3.
+       apply subseq3. apply subseq2. apply subseq3. apply subseq2.
+       apply subseq1. Qed.
 
 Example subseq_fail1 : subseq [1;2;3] [1;2].
-Proof. apply s2. apply s2. Abort.
+Proof. apply subseq2. apply subseq2. Abort.
 Example subseq_fail2 : subseq [1;2;3] [1;3].
-Proof. apply s2. apply s3. Abort.
+Proof. apply subseq2. apply subseq3. Abort.
 Example subseq_fail3 : subseq [1;2;3] [5;6;2;1;7;3;8].
-Proof. apply s3. apply s3. apply s3. apply s2.
-       apply s3. apply s3. apply s3. Abort.
+Proof. apply subseq3. apply subseq3. apply subseq3. apply subseq2.
+       apply subseq3. apply subseq3. apply subseq3. Abort.
 
 Theorem subseq_refl : forall l : list nat, subseq l l.
 Proof.
   intros l. induction l.
-  - apply s1.
-  - apply s2. apply IHl.
+  - apply subseq1.
+  - apply subseq2. apply IHl.
 Qed.
 
 Theorem subseq_app : forall l1 l2 l3, subseq l1 l2 -> subseq l1 (l2 ++ l3).
@@ -370,24 +372,24 @@ Proof.
     (* By inducting on H, we aim to show that for each of the 3
        inductive constructors, appending an arbitrary list l3 to the
        second list does not change the fact that l1 is still a subseq. *)
-  - apply s1.
-  - simpl. apply s2. apply IHsubseq.
-  - simpl. apply s3. apply IHsubseq.
+  - apply subseq1.
+  - simpl. apply subseq2. apply IHsubseq.
+  - simpl. apply subseq3. apply IHsubseq.
 Qed.
 
 Theorem subseq_trans : forall l1 l2 l3,
   subseq l1 l2 -> subseq l2 l3 -> subseq l1 l3.
 Proof.
   intros l1 l2 l3 H1 H2. generalize dependent l1. induction H2.
-  - intros l1 H1. inversion H1. apply s1.
+  - intros l1 H1. inversion H1. apply subseq1.
   - intros l1 H1. 
     (* Here, H2: subseq t1 t2 links IHsubseq: subseq l1 t1 -> subseq l1 t2
        together, so to speak. *)
     inversion H1. (* Now we break apart the possibilities for l1. *)
-    + apply s1.
-    + apply s2. apply IHsubseq. apply H3.
-    + apply s3. apply IHsubseq. apply H3.
-  - intros. apply s3. apply IHsubseq. apply H1.
+    + apply subseq1.
+    + apply subseq2. apply IHsubseq. apply H3.
+    + apply subseq3. apply IHsubseq. apply H3.
+  - intros. apply subseq3. apply IHsubseq. apply H1.
 Qed. (* I got this by myself, but I have only a vague idea of why/how it
         works; by breaking up each inductive definition case
         (with induction H2), then once more in the second
@@ -598,14 +600,14 @@ Proof.
     + reflexivity.
     + reflexivity.
     + simpl. apply andb_true_iff. split.
-      * apply IHexp_match1. exists s4. apply H0_.
-      * apply IHexp_match2. exists s5. apply H0_0.
+      * apply IHexp_match1. exists s1. apply H0_.
+      * apply IHexp_match2. exists s2. apply H0_0.
     + simpl. apply orb_true_iff. left. apply IHexp_match.
-      exists s4. apply H0.
+      exists s1. apply H0.
     + simpl. apply orb_true_iff. right. apply IHexp_match.
-      exists s4. apply H0.
+      exists s2. apply H0.
     + reflexivity.
-    + apply IHexp_match2. exists s5. apply H0_0.
+    + apply IHexp_match2. exists s2. apply H0_0.
   - intros H. induction re.
     + inversion H.
     + exists []. apply MEmpty.
@@ -676,11 +678,6 @@ Proof.
       * apply H1.
 Qed.
 
-Lemma s_match___s_match_star_re : forall T (s : list T) (re : reg_exp T),
-  s =~ Star re -> s =~ EmptyStr \/ s =~ re.
-Proof.
-  intros T s re H1. Admitted.
-
 Lemma MStar'' : forall T (s : list T) (re : reg_exp T),
     s =~ Star re ->
     exists ss : list (list T),
@@ -695,7 +692,7 @@ Proof.
   inversion Heqre'.
   inversion Heqre'. exists []. simpl. intuition.
   specialize (IHexp_match2 Heqre'). destruct IHexp_match2 as [ss IHx]. 
-  destruct IHx. exists (s4:: ss). split.
+  destruct IHx. exists (s1:: ss). split.
   simpl. rewrite H1. reflexivity.
  intros s' Hin. simpl in Hin. destruct Hin. congruence.
 Abort.
@@ -718,9 +715,9 @@ Proof.
     (* Didn't know how to use specialize before, this is useful. *)
     destruct IHexp_match2 as [ss [IHxa IHxb]].
     (* This I had originally, but in a later step. Apparently too late. *)
-    exists (s4 :: ss).
-    (* This was my biggest mistake. I was trying to say that (s4 :: s5)
-       exists; easily got the s4 case, but wasn't able to prove for s5. *)
+    exists (s1 :: ss).
+    (* This was my biggest mistake. I was trying to say that (s1 :: s2)
+       exists; easily got the s1 case, but wasn't able to prove for s2. *)
     split.
     + simpl. rewrite IHxa. reflexivity.
     + simpl. intros s' Hin. destruct Hin.
@@ -730,5 +727,39 @@ Proof.
       * apply IHxb. apply H.
         (* This makes me feel dumb; only two tactics applied, whereas
            my attempts spanned 4 or 5 entire lines. I think all the problems
-           stemmed from my using exists (s4 :: s5) instead of (s4 :: ss). *)
+           stemmed from my using exists (s1 :: s2) instead of (s1 :: ss). *)
 Qed.
+
+Module Pumping.
+
+Fixpoint pumping_constant {T} (re : reg_exp T) : nat :=
+  match re with
+  | EmptySet => 0
+  | EmptyStr => 1
+  | Char _ => 2
+  | App re1 re2 => pumping_constant re1 + pumping_constant re2
+  | Union re1 re2 => pumping_constant re1 + pumping_constant re2
+  | Star _ => 1
+  end.
+
+Fixpoint napp {T} (n : nat) (l : list T) : list T :=
+  match n with
+  | 0 => []
+  | S n' => l ++ napp n' l
+end.
+
+Lemma napp_plus : forall T (n m : nat) (l : list T),
+  napp (n + m) l = napp n l ++ napp m l.
+Proof.
+  intros T n m l. induction n.
+  - reflexivity.
+  - simpl. rewrite <- app_assoc. rewrite IHn. reflexivity.
+Qed.
+
+Lemma pumping : forall T (re : reg_exp T) s,
+  s =~ re ->
+  pumping_constant re <= length s ->
+  exists s1 s2 s3,
+    s = s1 ++ s2 ++ s3 /\
+    s2 <> [] /\
+    forall m, s1 ++ napp m s2 ++ s3 =~ re.
