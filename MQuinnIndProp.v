@@ -742,6 +742,11 @@ Fixpoint pumping_constant {T} (re : reg_exp T) : nat :=
   | Star _ => 1
   end.
 
+Example pc_ex1 : pumping_constant (Char 8) = 2.
+Proof. simpl. reflexivity. Qed.
+Example pc_ex2 : pumping_constant (App (Char 4) (Char 5)) = 4.
+Proof. simpl. reflexivity. Qed.
+
 Fixpoint napp {T} (n : nat) (l : list T) : list T :=
   match n with
   | 0 => []
@@ -756,9 +761,43 @@ Proof.
   - simpl. rewrite <- app_assoc. rewrite IHn. reflexivity.
 Qed.
 
+Lemma a_plus_b_0__a_b_0 : forall a b : nat,
+  a + b = 0 -> a = 0 /\ b = 0.
+Proof.
+  intros. destruct a.
+  - simpl in H. rewrite H. split. reflexivity. reflexivity.
+  - inversion H.
+Qed.
+
 Lemma pumping_lem1 : forall T (re1 re2 : reg_exp T) (s1 s2 : list T),
-  pumping_constant re1 + pumping_constant re2 <= length (s1 ++ s2) ->
+  s1 =~ re1 ->
+  s2 =~ re2 ->
+  pumping_constant (App re1 re2) <= length (s1 ++ s2) ->
   pumping_constant re1 <= length s1 /\ pumping_constant re2 <= length s2.
+Proof.
+  intros. inversion H.
+  - Admitted.
+(* TODO: Currently getting stuck b/c length [] is 0 but
+       pumping_constant for EmptyStr is 1. *)
+
+Lemma a_b_le_c__a_le_c : forall a b c : nat,
+  a + b <= c -> a <= c.
+Proof.
+  intros. generalize dependent a. induction b.
+  - intros a H. rewrite <- plus_n_0 in H. apply H.
+  - intros a H. rewrite <- plus_n_Sm in H. rewrite plus_comm in H.
+    rewrite plus_n_Sm in H. rewrite plus_comm in H. apply IHb in H.
+    apply le_S in H. apply le_S_n in H. apply H.
+Qed.
+
+Lemma pumping_lem3 : forall T (re : reg_exp T) (s1 s2 : list T),
+  s1 =~ re ->
+  s2 =~ Star re ->
+  pumping_constant (Star re) <= length (s1 ++ s2) ->
+  pumping_constant re <= length s1
+    /\ pumping_constant (Star re) <= length s2.
+Proof.
+  simpl. intros. induction H.
 Admitted.
 
 Lemma pumping : forall T (re : reg_exp T) s,
@@ -773,7 +812,7 @@ Require Import Coq.omega.Omega.
   intros T re s Hmatch. induction Hmatch.
   - simpl. omega.
   - simpl. omega.
-  - simpl. intros H. apply pumping_lem1 in H as [Hlen1 Hlen2].
+  - intros H. apply pumping_lem1 in H as [Hlen1 Hlen2].
     specialize (IHHmatch1 Hlen1). specialize (IHHmatch2 Hlen2).
     destruct IHHmatch1 as [a1 [a2 [a3 [IHH1A [IHH1B IHH1C]]]]].
     destruct IHHmatch2 as [b1 [b2 [b3 [IHH2A [IHH2B IHH2C]]]]].
@@ -782,10 +821,49 @@ Require Import Coq.omega.Omega.
       rewrite IHH2A. reflexivity.
     + split.
       * apply IHH1B.
-      * intros m. rewrite <- IHH2A. Search list.
+      * intros m. rewrite <- IHH2A.
         rewrite app_assoc. rewrite app_assoc.
         { apply (MApp ((a1 ++ (napp m a2)) ++ a3) re1 s2 re2).
           - rewrite <- app_assoc. apply IHH1C.
           - apply Hmatch2. }
-  - 
+    + apply Hmatch1.
+    + apply Hmatch2.
+  - simpl. intros H. apply a_b_le_c__a_le_c in H.
+    specialize (IHHmatch H).
+    destruct IHHmatch as [a1 [a2 [a3 [IHH1A [IHH1B IHH1C]]]]].
+    exists a1, a2, a3. split.
+    + apply IHH1A.
+    + split.
+      * apply IHH1B.
+      * intros m. apply (MUnionL (a1 ++ napp m a2 ++ a3) re1 re2).
+        apply IHH1C.
+  - simpl. intros H. rewrite plus_comm in H. apply a_b_le_c__a_le_c in H.
+    specialize (IHHmatch H).
+    destruct IHHmatch as [b1 [b2 [b3 [IHH2A [IHH2B IHH2C]]]]].
+    exists b1, b2, b3. split.
+    + apply IHH2A.
+    + split.
+      * apply IHH2B.
+      * intros m. apply (MUnionR re1 (b1 ++ napp m b2 ++ b3) re2).
+        apply IHH2C.
+  - simpl. intros. inversion H.
+  - intros. apply pumping_lem3 in H as [H1 H2].
+    specialize (IHHmatch1 H1).
+    specialize (IHHmatch2 H2).
+    destruct IHHmatch1 as [a1 [a2 [a3 [IHH1A [IHH1B IHH1C]]]]].
+    destruct IHHmatch2 as [b1 [b2 [b3 [IHH2A [IHH2B IHH2C]]]]].
+    exists a1, a2, (a3 ++ b1 ++ b2 ++ b3). split.
+    + rewrite IHH1A. rewrite IHH2A. rewrite <- app_assoc.
+      rewrite <- app_assoc. reflexivity.
+    + split.
+      * apply IHH1B.
+      * intros m.
+        rewrite app_assoc. rewrite app_assoc.
+        { apply (MStarApp ((a1 ++ napp m a2) ++ a3) (b1 ++ b2 ++ b3) re).
+          - rewrite <- app_assoc. apply IHH1C.
+          - rewrite <- IHH2A. apply Hmatch2. }
+    + apply Hmatch1.
+    + apply Hmatch2.
+Qed.
+
 End Pumping.
