@@ -742,11 +742,6 @@ Fixpoint pumping_constant {T} (re : reg_exp T) : nat :=
   | Star _ => 1
   end.
 
-Example pc_ex1 : pumping_constant (Char 8) = 2.
-Proof. simpl. reflexivity. Qed.
-Example pc_ex2 : pumping_constant (App (Char 4) (Char 5)) = 4.
-Proof. simpl. reflexivity. Qed.
-
 Fixpoint napp {T} (n : nat) (l : list T) : list T :=
   match n with
   | 0 => []
@@ -775,10 +770,8 @@ Lemma pumping_lem1 : forall T (re1 re2 : reg_exp T) (s1 s2 : list T),
   pumping_constant (App re1 re2) <= length (s1 ++ s2) ->
   pumping_constant re1 <= length s1 /\ pumping_constant re2 <= length s2.
 Proof.
-  intros. inversion H.
-  - Admitted.
-(* TODO: Currently getting stuck b/c length [] is 0 but
-       pumping_constant for EmptyStr is 1. *)
+  intros T re1 re2 s1 s2 H1 H2 H3.
+  Admitted.
 
 Lemma a_b_le_c__a_le_c : forall a b c : nat,
   a + b <= c -> a <= c.
@@ -865,5 +858,15 @@ Require Import Coq.omega.Omega.
     + apply Hmatch1.
     + apply Hmatch2.
 Qed.
+(* NOTE: I tried this for a long time but eventually had to move on.
+   I'm 99% confident that the proof used for Lemma 'pumping' directly
+   above is correct. However, I had to admit supporting lemmas 1 and 3.
+   For lemma 1, I realize that the premises stated are not actually
+   provable; ie., [] =~ EmptyStr for s1 and re1 are valid inputs to an
+   Append expression, so breaking them apart for arbitrary s2 and re2
+   is not possible b/c pumping_constant(EmptyStr) (which is 1) is not
+   greater than the length of [] (which is 0). I do not know how to
+   resolve this at this time.
+*)
 
 End Pumping.
