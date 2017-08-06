@@ -868,5 +868,62 @@ Qed.
    greater than the length of [] (which is 0). I do not know how to
    resolve this at this time.
 *)
-
 End Pumping.
+
+Theorem filter_not_empty_In : forall n l,
+  filter (beq_nat n) l <> [] -> In n l.
+Proof.
+  intros n l. induction l as [| m l' IHl'].
+  - simpl. intros H. apply H. reflexivity.
+  - simpl. destruct (beq_nat n m) eqn:H.
+    + intros _. rewrite beq_nat_true_iff in H. rewrite H.
+      left. reflexivity.
+    + intros H'. right. apply IHl'. apply H'.
+Qed.
+
+Module FirstTry.
+
+Inductive reflect : Prop -> bool -> Prop :=
+  | ReflectT : forall (P:Prop), P -> reflect P true
+  | ReflectF : forall (P:Prop), ~P -> reflect P false.
+
+End FirstTry.
+
+Inductive reflect (P : Prop) : bool -> Prop :=
+  | ReflectT : P -> reflect P true
+  | ReflectF : ~P -> reflect P false.
+
+Theorem iff_reflect : forall P b, (P <-> b = true) -> reflect P b.
+Proof.
+  intros P b H. destruct b.
+  - apply ReflectT. rewrite H. reflexivity.
+  - apply ReflectF. rewrite H. unfold not. intros. inversion H0.
+Qed.
+
+Theorem reflect_iff : forall P b, reflect P b -> (P <-> b = true).
+Proof.
+  intros P b H. split.
+  - destruct b.
+    + intros _. reflexivity.
+    + intros. inversion H. generalize dependent P.
+      intros P H1 H2 []. apply H2.
+  - destruct b.
+    + intros. inversion H. apply H1.
+    + intros H1. rewrite H1 in H. inversion H. apply H0.
+Qed.
+
+Lemma beq_natP : forall n m, reflect (n = m) (beq_nat n m).
+Proof.
+  intros n m.
+  apply iff_reflect. rewrite beq_nat_true_iff. reflexivity.
+Qed.
+
+Theorem filter_not_empty_In' : forall n l,
+  filter (beq_nat n) l <> [] -> In n l.
+Proof.
+  intros n l. induction l as [| m l' IHl'].
+  - simpl. intros H. apply H. reflexivity.
+  - simpl. destruct (beq_natP n m) as [H | H].
+    + intros _. rewrite H. left. reflexivity.
+    + intros H'. right. apply IHl'. apply H'.
+Qed.
