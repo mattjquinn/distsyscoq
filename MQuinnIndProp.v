@@ -927,3 +927,23 @@ Proof.
     + intros _. rewrite H. left. reflexivity.
     + intros H'. right. apply IHl'. apply H'.
 Qed.
+
+Fixpoint count n l :=
+  match l with
+  | [] => 0
+  | m :: l' => (if beq_nat n m then 1 else 0) + count n l'
+  end.
+
+Theorem beq_natP_practice : forall n l, count n l = 0 -> ~(In n l).
+Proof.
+  intros. induction l.
+  - intros H1. inversion H1.
+  - simpl. intros [H1 | H2].
+    + inversion H. generalize dependent H2. destruct (beq_natP n x).
+      * intros H2. inversion H2.
+      * unfold not in H0. rewrite H1 in H0. intros _. apply H0. reflexivity.
+    + inversion H. generalize dependent H1. destruct (beq_natP n x).
+      * intros H3. inversion H3.
+      * intros H3. rewrite plus_0_n' in H3. apply IHl in H3.
+        unfold not in H3. apply H3. apply H2.
+Qed.
