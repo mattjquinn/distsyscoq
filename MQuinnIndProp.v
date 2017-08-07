@@ -947,3 +947,24 @@ Proof.
       * intros H3. rewrite plus_0_n' in H3. apply IHl in H3.
         unfold not in H3. apply H3. apply H2.
 Qed.
+
+Inductive nostutter {X : Type} : list X -> Prop :=
+  | NoStutter1 : nostutter []
+  | NoStutter2 : forall (x : X), nostutter (x :: [])
+  | NoStutter3 : forall (a b : X) (l : list X),
+                 a <> b -> nostutter (b :: l) -> nostutter (a :: b :: l).
+
+Example test_nostutter_1: nostutter [3;1;4;1;5;6].
+Proof. repeat constructor; apply beq_nat_false_iff; auto. Qed.
+Example test_nostutter_2: nostutter (@nil nat).
+Proof. repeat constructor; apply beq_nat_false_iff; auto. Qed.
+Example test_nostutter_3: nostutter [5].
+Proof. repeat constructor; apply beq_nat_false; auto. Qed.
+Example test_nostutter_4: not (nostutter [3;1;1;4]).
+Proof. intro.
+  repeat match goal with
+    h: nostutter _ |- _ => inversion h; clear h; subst
+  end.
+  contradiction H1; auto. Qed.
+
+(*  *)
