@@ -967,4 +967,72 @@ Proof. intro.
   end.
   contradiction H1; auto. Qed.
 
-(*  *)
+Inductive in_order_merge {X : Type} : list X -> list X -> list X -> Prop :=
+  | IOM1 : in_order_merge [] [] []
+  | IOM2 : forall x : X, in_order_merge [] [x] [x]
+  | IOM3 : forall x : X, in_order_merge [x] [] [x]
+  | IOM4 : forall (x : X) (l1 l2 l3 : list X),
+      in_order_merge l1 l2 l3 -> in_order_merge (x::l1) l2 (x::l3)
+  | IOM5 : forall (x : X) (l1 l2 l3 : list X),
+      in_order_merge l1 l2 l3 -> in_order_merge l1 (x::l2) (x::l3).
+
+Example test_inordermerge_1 : in_order_merge [1;6;2] [4;3] [1;4;6;2;3].
+Proof. apply IOM4. apply IOM5. apply IOM4. apply IOM4. apply IOM2. Qed.
+Example test_inordermerge_2 : in_order_merge [4;3] [1;6;2] [1;4;6;2;3].
+Proof. apply IOM5. apply IOM4. apply IOM5. apply IOM5. apply IOM3. Qed.
+
+Lemma x_l_implies_x_in_l : forall (X : Type) (x : X) (l : list X),
+  [x] = l -> In x l.
+Proof.
+  intros. induction l.
+  - inversion H.
+  - simpl. inversion H. left. reflexivity. Qed.
+
+Lemma in_order_merge_x_l_implies_x_in_l1_or_l2 : forall (X : Type)
+  (l l1 l1' l2 l2' : list X) (x : X),
+  in_order_merge l1 l2 (x::l) -> l1 = x::l1' \/ l2 = x::l2'.
+Admitted.
+
+Lemma mq_lem1 : forall (X : Type) (l l1 l2 : list X) (x : X),
+  in_order_merge l1 l2 (x :: l) -> In x l1 \/ In x l2.
+Admitted.
+
+Theorem filter_test_l__eq__l1_of_in_order_merge : forall (X : Type)
+  (l l1 l2 : list X) (test : X -> bool),
+  in_order_merge l1 l2 l ->
+  All (fun x : X => test x = true) l1 ->
+  All (fun x : X => test x = false) l2 ->
+  filter test l = l1.
+Proof.
+  intros. induction l.
+  - inversion H. simpl. reflexivity.
+  - simpl. destruct (test x) eqn:TestEqn.
+    + apply mq_lem1 in H as [|].
+      * admit.
+      * admit.
+    + apply IHl. apply mq_lem1 in H. Abort.
+
+(*
+Theorem filter_test_l__eq__l1_of_in_order_merge : forall (X : Type)
+  (l l1 l2 : list X) (test : X -> bool),
+  in_order_merge l1 l2 l ->
+  All (fun x : X => test x = true) l1 ->
+  All (fun x : X => test x = false) l2 ->
+  filter test l = l1.
+Proof.
+  intros. inversion H.
+  - simpl. reflexivity.
+  - simpl. rewrite <- All_In in H1. apply x_l_implies_x_in_l in H3.
+    apply H1 in H3. rewrite H3. reflexivity.
+  - simpl. rewrite <- All_In in H0. apply x_l_implies_x_in_l in H2.
+    apply H0 in H2. rewrite H2. reflexivity.
+  - 
+*)
+
+(*
+ * MQUINN 08-13-2017 : In the interest of not getting so bogged down
+   that I give up on Coq entirely, I am skipping the exercises after
+   nostutter for now.
+   TODO: Come back to these at a later date, especially for practice
+   with inductive propositions.
+*)
