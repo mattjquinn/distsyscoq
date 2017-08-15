@@ -113,3 +113,32 @@ Proof.
     reflexivity.
   - reflexivity.
 Qed.
+
+Definition partial_map (A : Type) := total_map (option A).
+Definition empty {A: Type} : partial_map A := t_empty None.
+Definition update {A:Type} (m : partial_map A) (x : id) (v : A) :=
+  t_update m x (Some v).
+
+Lemma apply_empty : forall A x, @empty A x = None.
+Proof. intros. unfold empty. apply t_apply_empty. Qed.
+
+Lemma update_eq : forall A (m : partial_map A) x v,
+  (update m x v) x = Some v.
+Proof. intros. unfold update. apply t_update_eq. Qed.
+
+Theorem update_neq : forall (X : Type) v x1 x2 (m : partial_map X),
+  x2 <> x1 -> (update m x2 v) x1 = m x1.
+Proof. intros x v x1 x2 m. unfold update. apply t_update_neq. Qed.
+
+Lemma update_shadow : forall A (m : partial_map A) v1 v2 x,
+  update (update m x v1) x v2 = update m x v2.
+Proof. intros. unfold update. apply t_update_shadow. Qed.
+
+Theorem update_same : forall X v x (m : partial_map X),
+  m x = Some v -> update m x v = m.
+Proof. intros. unfold update. rewrite <- H. apply t_update_same. Qed.
+
+Theorem update_permute : forall (X:Type) v1 v2 x1 x2 (m : partial_map X),
+  x2 <> x1 -> (update (update m x2 v2) x1 v1)
+            = (update (update m x1 v1) x2 v2).
+Proof. intros X v1 v2 x1 x2 m. unfold update. apply t_update_permute. Qed.
