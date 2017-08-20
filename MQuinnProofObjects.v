@@ -170,3 +170,17 @@ Lemma leibniz_equality : forall (X : Type) (x y : X),
 Proof.
   intros X x y H1 P H2. destruct H1. apply H2. Qed.
 
+Lemma four: 2 + 2 = 1 + 3.
+Proof. apply eq_refl. Qed.
+
+Definition four' : 2 + 2 = 1 + 3 :=
+  eq_refl 4.
+
+Definition singleton : forall (X : Set) (x : X),
+  [] ++ [x] = x :: [] :=
+    fun (X : Set) (x : X) => eq_refl [x].
+
+End MyEquality.
+
+Definition quiz6 : exists x, x + 3 = 4 :=
+  ex_intro (fun z => (z + 3 = 4)) 1 (refl_equal 4).
