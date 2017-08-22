@@ -131,3 +131,16 @@ Inductive foo' (X : Type) : Type :=
 *)
 
 Check foo'_ind.
+
+Definition P_m0r (n:nat) : Prop :=
+  n * 0 = 0.
+
+Definition P_m0r' : nat -> Prop :=
+  fun n => n * 0 = 0.
+
+Theorem mult_0_r'' : forall n : nat, P_m0r n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n IHn. unfold P_m0r in IHn. unfold P_m0r.
+    simpl. apply IHn. Qed.
