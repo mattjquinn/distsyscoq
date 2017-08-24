@@ -144,3 +144,19 @@ Proof.
   - reflexivity.
   - intros n IHn. unfold P_m0r in IHn. unfold P_m0r.
     simpl. apply IHn. Qed.
+
+Theorem plus_assoc' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p. induction n as [| n'].
+  - reflexivity.
+  - simpl. rewrite -> IHn'. reflexivity. Qed.
+
+Theorem plus_comm' : forall n m : nat,
+  n + m = m + n.
+Proof.
+  induction n as [| n'].
+  - intros m. rewrite <- plus_n_0. reflexivity.
+  - intros m. simpl. rewrite -> IHn'.
+    rewrite <- plus_n_Sm. reflexivity. Qed.
+
