@@ -160,3 +160,56 @@ Proof.
   - intros m. simpl. rewrite -> IHn'.
     rewrite <- plus_n_Sm. reflexivity. Qed.
 
+Theorem plus_comm'' : forall n m : nat,
+  n + m = m + n.
+Proof.
+  induction m as [| m'].
+  - simpl. rewrite <- plus_n_0. reflexivity.
+  - simpl. rewrite <- IHm'. rewrite <- plus_n_Sm. reflexivity. Qed.
+
+Definition P_plus_assoc (n m p : nat) : Prop :=
+  n + (m + p) = (n + m) + p.
+
+Theorem plus_assoc'' : forall n m p : nat, P_plus_assoc n m p.
+Proof.
+  intros n m. apply nat_ind.
+  - intros. unfold P_plus_assoc. rewrite <- plus_assoc. reflexivity.
+  - intros. unfold P_plus_assoc. rewrite <- plus_assoc. reflexivity.
+Qed.
+
+Definition P_plus_comm (n m : nat) : Prop :=
+  n + m = m + n.
+
+Theorem plus_comm''' : forall n m : nat, P_plus_comm n m.
+Proof.
+  intros n. apply nat_ind.
+  - unfold P_plus_comm. simpl. rewrite plus_n_0. reflexivity.
+  - intros. unfold P_plus_comm. unfold P_plus_comm in H.
+    rewrite <- plus_1_l. rewrite plus_swap. rewrite <- plus_assoc. 
+    rewrite H. reflexivity.
+Qed.
+
+Check ev_ind.
+
+Theorem ev_ev' : forall n, ev n -> ev' n.
+Proof.
+  apply ev_ind.
+  - apply ev'_0.
+  - intros m Hm IH. apply (ev'_sum 2 m).
+    + apply ev'_2.
+    + apply IH.
+Qed.
+
+Check le_ind.
+
+Inductive le (n : nat) : nat -> Prop :=
+  | le_n : le n n
+  | le_S : forall m, (le n m) -> (le n (S m)).
+
+Notation "m <= n" := (le m n).
+
+Check le_ind.
+(* NOTE: This looks the same as le_ind for the overriden definition of
+   le; I think an update to Coq must be identifying generalizable
+   parameters and automatically optimizing the corresponding induction
+   definition. *)
