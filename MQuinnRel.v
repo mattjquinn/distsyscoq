@@ -88,3 +88,72 @@ Proof.
   - inversion H. apply le_n. inversion H1.
   - apply le_S_n. apply H.
 Qed.
+
+(*
+  Theorem : forall n : nat, ~ (S n <= n)
+  Proof. By induction on n.
+  - Suppose n = 0. We must show ~ (S 0) <= 0, or ~ 1 <= 0.
+    This follows trivially.
+  - Suppose n = S n'. Suppose further that ~ (S n' <= n') holds.
+    We must show ~ (S (S n') <= (S n')). This simplifies to
+    ~ (S n' <= n'), and is true by application of the induction hypothesis.
+  Qed.
+*)
+
+Theorem le_Sn_n : forall n, ~ (S n <= n).
+Proof.
+  intros. induction n as [| n' IHn'].
+  - unfold not. intros H. inversion H.
+  - unfold not. intros H. apply le_S_n in H.
+    generalize dependent H. apply IHn'.
+Qed.
+
+Definition symmetric {X : Type} (R : relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+Theorem le_not_symmetric : ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros Hc.
+  assert (1 <= 0) as Nonsense. {
+    apply Hc. apply le_S. apply le_n. }
+  inversion Nonsense.
+Qed.
+
+Definition antisymmetric {X : Type} (R : relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+Lemma n_eq_m__S_n_eq_S_m : forall n m : nat,
+  n = m -> S n = S m.
+Proof.
+  intros n. apply nat_ind.
+  - intros. rewrite H. reflexivity.
+  - intros. rewrite H0. reflexivity.
+  - apply n.
+Qed.
+
+Theorem le_antisymmetric : antisymmetric le.
+Proof.
+  unfold antisymmetric. intros. generalize dependent b. induction a.
+  - intros. inversion H0. reflexivity.
+  - destruct b.
+    + intros. inversion H.
+    + intros. apply n_eq_m__S_n_eq_S_m. apply IHa.
+      * apply le_S_n in H. apply H.
+      * apply le_S_n in H0. apply H0.
+Qed.
+
+Theorem le_step : forall n m p, n < m -> m <= S p -> n <= p.
+Proof.
+  intros. apply Lt.lt_le_S in H. apply Le.le_S_n.
+  generalize dependent H0. generalize dependent H.
+  apply (le_trans (S n) m (S p)). Qed.
+
+Definition equivalence {X : Type} (R : relation X) :=
+  (reflexive R) /\ (symmetric R) /\ (transitive R).
+
+Definition order {X : Type} (R : relation X) :=
+  (reflexive R) /\ (antisymmetric R) /\ (transitive R).
+
+Definition preorder {X : Type} (R : relation X) :=
+  (reflexive R) /\ (transitive R).
+
