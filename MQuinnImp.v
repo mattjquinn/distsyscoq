@@ -159,6 +159,7 @@ Fixpoint aexp_optimizer (a : aexp) : aexp :=
   | AMinus e1 (ANum 0) => aexp_optimizer e1 (* OPTIMIZATION #2 *)
   | AMinus e1 e2 => AMinus (aexp_optimizer e1) (aexp_optimizer e2)
   | AMult (ANum 0) e2 => ANum 0 (* OPTIMIZATION #1 *)
+  | AMult e1 (ANum 0) => ANum 0 (* OPTIMIZATION #3 *)
   | AMult e1 e2 => AMult (aexp_optimizer e1) (aexp_optimizer e2)
   end.
 
@@ -176,8 +177,34 @@ Proof.
       * rewrite IHa1. apply minus_n_O. (* OPTIMIZATION #2 *)
       * simpl. rewrite IHa1. reflexivity.
   - (* -> aeval (aexp_optimizer (AMult a1 a2)) = aeval (AMult a1 a2) *)
-    simpl. destruct a1;
-      repeat (simpl; simpl in IHa1; rewrite IHa1; rewrite IHa2; reflexivity).
-    simpl. destruct n; (* OPTIMIZATION #1 *)
-        simpl; try rewrite IHa2; reflexivity.
+    (* NOTE: Large portions of this subproof are repetitive, but at this
+       time I do not know how to repeat large blocks of tacticals. *)
+    simpl. destruct a1.
+    + simpl. destruct n.
+      * reflexivity.
+      * simpl. { destruct a2;
+        try (simpl; simpl in IHa2; rewrite IHa2; reflexivity).
+        - simpl. destruct n0.
+          + apply mult_n_O.
+          + reflexivity. }
+     + simpl. { destruct a2;
+        try (simpl; simpl in IHa2; rewrite IHa2;
+                    simpl in IHa1; rewrite IHa1; reflexivity).
+        - simpl. destruct n.
+          + apply mult_n_O.
+          + simpl. simpl in IHa1. rewrite IHa1. reflexivity. }
+     + simpl. destruct a2;
+       try (simpl; simpl in IHa1; rewrite IHa1; simpl in IHa2;
+              rewrite IHa2; reflexivity).
+       * simpl. { destruct n.
+         - apply mult_n_O.
+         - simpl. destruct a1_2;
+             try (simpl; simpl in IHa1; rewrite IHa1; reflexivity). }
+     + simpl. destruct a2;
+       try (simpl; simpl in IHa1; rewrite IHa1; simpl in IHa2;
+              rewrite IHa2; reflexivity).
+       * simpl. { destruct n.
+         - apply mult_n_O.
+         - simpl. destruct a1_2;
+             try (simpl; simpl in IHa1; rewrite IHa1; reflexivity). }
 Qed.
