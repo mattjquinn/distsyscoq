@@ -156,8 +156,9 @@ Fixpoint aexp_optimizer (a : aexp) : aexp :=
   match a with
   | ANum n => ANum n
   | APlus e1 e2 => APlus (aexp_optimizer e1) (aexp_optimizer e2)
+  | AMinus e1 (ANum 0) => aexp_optimizer e1 (* OPTIMIZATION #2 *)
   | AMinus e1 e2 => AMinus (aexp_optimizer e1) (aexp_optimizer e2)
-  | AMult (ANum 0) e2 => ANum 0
+  | AMult (ANum 0) e2 => ANum 0 (* OPTIMIZATION #1 *)
   | AMult e1 e2 => AMult (aexp_optimizer e1) (aexp_optimizer e2)
   end.
 
@@ -168,9 +169,15 @@ Proof.
   induction a;
     try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
     try reflexivity.
-  - (* -> 0 * e2 ... *)
+  - (* aeval (aexp_optimizer (AMinus a1 a2)) = aeval (AMinus a1 a2) *)
+    simpl. destruct a2;
+      try (simpl; simpl in IHa2; rewrite IHa2; rewrite IHa1; reflexivity).
+    + simpl. destruct n.
+      * rewrite IHa1. apply minus_n_O. (* OPTIMIZATION #2 *)
+      * simpl. rewrite IHa1. reflexivity.
+  - (* -> aeval (aexp_optimizer (AMult a1 a2)) = aeval (AMult a1 a2) *)
     simpl. destruct a1;
       repeat (simpl; simpl in IHa1; rewrite IHa1; rewrite IHa2; reflexivity).
-      simpl. destruct n;
+    simpl. destruct n; (* OPTIMIZATION #1 *)
         simpl; try rewrite IHa2; reflexivity.
 Qed.
