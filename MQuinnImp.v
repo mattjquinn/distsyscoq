@@ -208,3 +208,77 @@ Proof.
          - simpl. destruct a1_2;
              try (simpl; simpl in IHa1; rewrite IHa1; reflexivity). }
 Qed.
+
+Tactic Notation "simpl_and_try" tactic(c) :=
+  simpl; try c.
+
+Require Import Coq.omega.Omega.
+
+Example silly_presburger_example : forall m n o p,
+  m + n <= n + o /\ o + 3 = p + 3 -> m <= p.
+Proof.
+  intros. omega.
+Qed.
+
+Module aevalR_first_try.
+
+Inductive aevalR : aexp -> nat -> Prop :=
+  | E_ANum : forall (n : nat), aevalR (ANum n) n
+  | E_APlus : forall (e1 e2 : aexp) (n1 n2 : nat),
+    aevalR e1 n1 ->
+    aevalR e2 n2 ->
+    aevalR (APlus e1 e2) (n1 + n2)
+  | E_AMinus : forall (e1 e2 : aexp) (n1 n2 : nat),
+    aevalR e1 n1 ->
+    aevalR e2 n2 ->
+    aevalR (AMinus e1 e2) (n1 - n2)
+  | E_AMult : forall (e1 e2 : aexp) (n1 n2 : nat),
+    aevalR e1 n1 ->
+    aevalR e2 n2 ->
+    aevalR (AMult e1 e2) (n1 * n2).
+
+Notation "e '\\' n"
+  := (aevalR e n) (at level 50, left associativity) : type_scope.
+
+End aevalR_first_try.
+
+Reserved Notation "e '\\' n" (at level 50, left associativity).
+
+Inductive aevalR : aexp -> nat -> Prop :=
+  | E_ANum : forall (n : nat), (ANum n) \\ n
+  | E_APlus : forall (e1 e2 : aexp) (n1 n2 : nat),
+    (e1 \\ n1) -> (e2 \\ n2) -> (APlus e1 e2) \\ (n1 + n2)
+  | E_AMinus : forall (e1 e2 : aexp) (n1 n2 : nat),
+    (e1 \\ n1) -> (e2 \\ n2) -> (AMinus e1 e2) \\ (n1 - n2)
+  | E_AMult : forall (e1 e2 : aexp) (n1 n2 : nat),
+    (e1 \\ n1) -> (e2 \\ n2) -> (AMult e1 e2) \\ (n1 * n2)
+where "e '\\' n" := (aevalR e n) : type_scope.
+
+Theorem aeval_iff_aevalR : forall a n, (a \\ n) <-> aeval a = n.
+Proof.
+  intros. split.
+  - intros H. induction H;
+      simpl; subst; reflexivity.
+  - intros H.
+    generalize dependent n. (* Forgot to do this, got stuck as a result. *)
+    induction a.
+    + intros n' H. subst n'. constructor.
+    + intros n' H. simpl in H. subst n'. apply E_APlus.
+      * apply IHa1. reflexivity.
+      * apply IHa2. reflexivity.
+    + intros n' H. simpl in H. subst n'. apply E_AMinus.
+      * apply IHa1. reflexivity.
+      * apply IHa2. reflexivity.
+    + intros n' H. simpl in H. subst n'. apply E_AMult.
+      * apply IHa1. reflexivity.
+      * apply IHa2. reflexivity.
+Qed.
+
+Theorem aeval_iff_aevalR' : forall a n, (a \\ n) <-> aeval a = n.
+Proof.
+  split.
+  - intros H; induction H; subst; reflexivity.
+  - generalize dependent n.
+    induction a; simpl; intros; subst; constructor;
+      try apply IHa1; try apply IHa2; reflexivity.
+Qed.
