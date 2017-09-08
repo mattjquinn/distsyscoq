@@ -282,3 +282,26 @@ Proof.
     induction a; simpl; intros; subst; constructor;
       try apply IHa1; try apply IHa2; reflexivity.
 Qed.
+
+Inductive bevalR : bexp -> bool -> Prop :=
+  | E_BTrue : bevalR BTrue true
+  | E_BFalse : bevalR BFalse false
+  | E_BEq : forall (a1 a2 : aexp),
+      bevalR (BEq a1 a2) ((aeval a1) =? (aeval a2))
+  | E_BLe : forall (a1 a2 : aexp),
+      bevalR (BLe a1 a2) ((aeval a1) <=? (aeval a2))
+  | E_BNot : forall b : bexp,
+      bevalR (BNot b) (negb (beval b))
+  | E_BAnd : forall (b1 b2 : bexp),
+      bevalR (BAnd b1 b2) ((beval b1) && (beval b2)).
+
+Lemma beval_iff_bevalR : forall b bv,
+  bevalR b bv <-> beval b = bv.
+Proof.
+  intros. split.
+  - intros H. induction H; reflexivity.
+  - intros H. induction b;
+      subst; simpl; constructor.
+Qed.
+
+End AExp.
