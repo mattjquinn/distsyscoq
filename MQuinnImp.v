@@ -405,3 +405,51 @@ Proof. reflexivity. Qed.
 Example bexp1 : beval (t_update empty_state X 5)
                       (BAnd BTrue (BNot (BLe (AId X) (ANum 4)))) = true.
 Proof. reflexivity. Qed.
+
+Inductive com : Type :=
+  | CSkip : com
+  | CAss : id -> aexp -> com
+  | CSeq : com -> com -> com
+  | CIf : bexp -> com -> com -> com
+  | CWhile : bexp -> com -> com.
+
+Notation "'SKIP'" := CSkip.
+Notation "x '::=' a" := (CAss x a) (at level 60).
+Notation "c1 ;; c2" := (CSeq c1 c2) (at level 80, right associativity).
+Notation "'WHILE' b 'DO' c 'END'" :=
+  (CWhile b c) (at level 80, right associativity).
+Notation "'IFB' c1 'THEN' c2 'ELSE' c3 'FI'" :=
+  (CIf c1 c2 c3) (at level 80, right associativity).
+
+Definition fact_in_coq : com :=
+  Z ::= AId X;;
+  Y ::= ANum 1;;
+  WHILE BNot (BEq (AId Z) (ANum 0)) DO
+    Y ::= AMult (AId Y) (AId Z);;
+    Z ::= AMinus (AId Z) (ANum 1)
+  END.
+
+Definition plus2 : com :=
+  X ::= (APlus (AId X) (ANum 2)).
+
+Definition XtimesYinZ : com :=
+  Z ::= (AMult (AId X) (AId Y)).
+
+Definition subtract_slowly_body : com :=
+  Z ::= AMinus (AId Z) (ANum 1) ;;
+  X ::= AMinus (AId X) (ANum 1).
+
+Definition subtract_slowly : com :=
+  WHILE BNot (BEq (AId X) (ANum 0)) DO
+    subtract_slowly_body
+  END.
+
+Definition subtract_3_from_5_slowly : com :=
+  X ::= ANum 3 ;;
+  Z ::= ANum 5 ;;
+  subtract_slowly.
+
+Definition loop : com :=
+  WHILE BTrue DO
+    SKIP
+  END.
