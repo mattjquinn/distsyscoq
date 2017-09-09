@@ -568,3 +568,26 @@ Proof.
         - apply E_Ass. reflexivity. }
       * apply E_WhileEnd. reflexivity.
 Qed.
+
+Theorem ceval_deterministic : forall c st st1 st2,
+  c / st \\ st1 ->
+  c / st \\ st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 H1 H2.
+  generalize dependent st2.
+  induction H1; intros st2 H2; inversion H2; subst.
+  - reflexivity.
+  - reflexivity.
+  - assert (st' = st'0) as HQ1. { apply IHceval1. apply H1. }
+    apply IHceval2. subst st'. assumption.
+  - apply IHceval. assumption.
+  - rewrite H in H7. inversion H7.
+  - rewrite H in H7. inversion H7.
+  - apply IHceval. assumption.
+  - reflexivity.
+  - rewrite H in H3. inversion H3.
+  - rewrite H in H5. inversion H5.
+  - assert (st' = st'0) as HQ1. { apply IHceval1. assumption. }
+    subst st'. apply IHceval2. assumption.
+Qed.
