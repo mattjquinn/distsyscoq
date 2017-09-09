@@ -453,3 +453,118 @@ Definition loop : com :=
   WHILE BTrue DO
     SKIP
   END.
+
+Fixpoint ceval_fun_no_while (st : state) (c : com) : state :=
+  match c with
+  | SKIP => st
+  | x ::= a1 => t_update st x (aeval st a1)
+  | c1 ;; c2 =>
+      let st' := ceval_fun_no_while st c1 in ceval_fun_no_while st' c2
+  | IFB b THEN c1 ELSE c2 FI =>
+      if (beval st b)
+        then ceval_fun_no_while st c1
+        else ceval_fun_no_while st c2
+  | WHILE b DO c END => st (* bogus *)
+      (* if (beval st b)
+        then ceval_fun_no_while st (c;; WHILE b DO c END)
+        else st *)
+  end.
+
+Reserved Notation "c1 '/' st '\\' st'" (at level 40, st at level 39).
+
+Inductive ceval : com -> state -> state -> Prop :=
+  | E_Skip : forall st, SKIP / st \\ st
+  | E_Ass : forall st a1 n x,
+      aeval st a1 = n ->
+      (x ::= a1) / st \\ (t_update st x n)
+  | E_Seq : forall c1 c2 st st' st'',
+      c1 / st \\ st' ->
+      c2 / st' \\ st'' ->
+      (c1 ;; c2) / st \\ st''
+  | E_IfTrue : forall st st' b c1 c2,
+      beval st b = true ->
+      c1 / st \\ st' ->
+      (IFB b THEN c1 ELSE c2 FI) / st \\ st'
+  | E_IfFalse : forall st st' b c1 c2,
+      beval st b = false ->
+      c2 / st \\ st' ->
+      (IFB b THEN c1 ELSE c2 FI) / st \\ st'
+  | E_WhileEnd : forall b st c,
+      beval st b = false ->
+      (WHILE b DO c END) / st \\ st
+  | E_WhileLoop : forall st st' st'' b c,
+      beval st b = true ->
+      c / st \\ st' ->
+      (WHILE b DO c END) / st' \\ st'' ->
+      (WHILE b DO c END) / st \\ st''
+where "c1 '/' st '\\' st'" := (ceval c1 st st').
+
+Example ceval_example1:
+  (X ::= ANum 2;;
+    IFB BLe (AId X) (ANum 1)
+      THEN Y ::= ANum 3
+      ELSE Z ::= ANum 4
+    FI)
+  / empty_state
+  \\ (t_update (t_update empty_state X 2) Z 4).
+Proof.
+  (* We must supply the intermediate state *)
+  apply E_Seq with (t_update empty_state X 2).
+  - (* assignment command *)
+    apply E_Ass. reflexivity.
+  - (* if command *)
+    apply E_IfFalse.
+      + reflexivity.
+      + apply E_Ass. reflexivity.
+Qed.
+
+Example ceval_example2 :
+  (X ::= ANum 0;; Y ::= ANum 1;; Z ::= ANum 2) / empty_state \\
+  (t_update (t_update (t_update empty_state X 0) Y 1) Z 2).
+Proof.
+  apply E_Seq with (t_update empty_state X 0).
+  - apply E_Ass. reflexivity.
+  - apply E_Seq with (t_update (t_update empty_state X 0) Y 1).
+    + apply E_Ass. reflexivity.
+    + apply E_Ass. reflexivity.
+Qed.
+
+Definition pup_to_n : com :=
+  Y ::= ANum 0 ;;
+  WHILE BNot (BEq (AId X) (ANum 0)) DO
+    Y ::= APlus (AId Y) (AId X) ;;
+    X ::= AMinus (AId X) (ANum 1)
+  END.
+
+Example pup_to_n_ex1 : pup_to_n / (t_update empty_state X 1) \\
+  (t_update (t_update (t_update (t_update empty_state X 1) Y 0) Y 1) X 0).
+Proof.
+  unfold pup_to_n.
+  apply E_Seq with (t_update (t_update empty_state X 1) Y 0).
+  - apply E_Ass. reflexivity.
+  - apply E_WhileLoop with (t_update (t_update (t_update (t_update empty_state X 1) Y 0) Y 1) X 0).
+    + reflexivity.
+    + apply E_Seq with (t_update (t_update (t_update empty_state X 1) Y 0) Y 1).
+      * apply E_Ass. reflexivity.
+      * apply E_Ass. reflexivity.
+    + apply E_WhileEnd. reflexivity.
+Qed.
+
+Theorem pup_to_2_ceval : pup_to_n / (t_update empty_state X 2) \\
+  t_update (t_update (t_update (t_update (t_update (t_update empty_state X 2) Y 0) Y 2) X 1) Y 3) X 0.
+Proof.
+  unfold pup_to_n.
+  apply E_Seq with (t_update (t_update empty_state X 2) Y 0).
+  - apply E_Ass. reflexivity.
+  - apply E_WhileLoop with (t_update (t_update (t_update (t_update empty_state X 2) Y 0) Y 2) X 1).
+    + reflexivity.
+    + apply E_Seq with (t_update (t_update (t_update empty_state X 2) Y 0) Y 2).
+      * apply E_Ass. reflexivity.
+      * apply E_Ass. reflexivity.
+    + apply E_WhileLoop with (t_update (t_update (t_update (t_update (t_update (t_update empty_state X 2) Y 0) Y 2) X 1) Y 3) X 0).
+      * reflexivity.
+      * { apply E_Seq with (t_update (t_update (t_update (t_update (t_update empty_state X 2) Y 0) Y 2) X 1) Y 3).
+        - apply E_Ass. reflexivity.
+        - apply E_Ass. reflexivity. }
+      * apply E_WhileEnd. reflexivity.
+Qed.
