@@ -591,3 +591,68 @@ Proof.
   - assert (st' = st'0) as HQ1. { apply IHceval1. assumption. }
     subst st'. apply IHceval2. assumption.
 Qed.
+
+Theorem plus2_spec : forall st n st',
+  st X = n ->
+  plus2 / st \\ st' ->
+  st' X = n + 2.
+Proof.
+  intros st n st' HX Heval.
+  inversion Heval. subst. simpl. unfold t_update. reflexivity. Qed.
+
+Theorem XtimesYinZ_spec : forall st st' a b,
+  st X = a ->
+  st Y = b ->
+  XtimesYinZ / st \\ st' ->
+  st' Z = a * b.
+Proof.
+  intros. inversion H1. subst.
+  simpl. apply t_update_eq. Qed.
+
+Theorem loop_never_stops : forall st st', ~(loop / st \\ st').
+Proof.
+  intros st st' contra. unfold loop in contra.
+  remember (WHILE BTrue DO SKIP END) as loopdef eqn:Heqloopdef.
+  induction contra; inversion Heqloopdef.
+  - subst. inversion H.
+  - subst. apply IHcontra2. reflexivity.
+Qed.
+
+Fixpoint no_whiles (c : com) : bool :=
+  match c with
+  | SKIP => true
+  | _ ::= _ => true
+  | c1 ;; c2 => andb (no_whiles c1) (no_whiles c2)
+  | IFB _ THEN ct ELSE cf FI => andb (no_whiles ct) (no_whiles cf)
+  | WHILE _ DO _ END => false
+  end.
+
+Inductive no_whilesR : com -> Prop :=
+  | R_NoWhilesSkip : no_whilesR SKIP
+  | R_NoWhilesAss : forall id val, no_whilesR (id ::= val)
+  | R_NoWhilesSeq : forall c1 c2,
+      no_whilesR c1 ->
+      no_whilesR c2 ->
+      no_whilesR (c1 ;; c2)
+  | R_NoWhilesIf : forall exp ct cf,
+      no_whilesR ct ->
+      no_whilesR cf ->
+      no_whilesR (IFB exp THEN ct ELSE cf FI).
+
+Theorem no_whiles_eqv : forall c, no_whiles c = true <-> no_whilesR c.
+Proof.
+  intros. split.
+  - intros H. induction c; try constructor.
+    + apply IHc1. simpl in H. apply andb_true_iff in H.
+      destruct H as [H1 H2]. apply H1.
+    + apply IHc2. simpl in H. apply andb_true_iff in H.
+      destruct H as [H1 H2]. apply H2.
+    + apply IHc1. simpl in H. apply andb_true_iff in H.
+      destruct H as [H1 H2]. apply H1.
+    + apply IHc2. simpl in H. apply andb_true_iff in H.
+      destruct H as [H1 H2]. apply H2.
+    + inversion H.
+  - intros H. induction H; try reflexivity; simpl;
+      rewrite IHno_whilesR1; rewrite IHno_whilesR2;
+      reflexivity.
+Qed.
