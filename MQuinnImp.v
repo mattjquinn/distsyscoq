@@ -656,3 +656,51 @@ Proof.
       rewrite IHno_whilesR1; rewrite IHno_whilesR2;
       reflexivity.
 Qed.
+
+Theorem no_whiles_terminating : forall prog st,
+  no_whiles prog = true ->
+  exists st', prog / st \\ st'.
+Proof.
+  intros. induction prog.
+  - exists st. apply E_Skip.
+  - exists (t_update st i (aeval st a)).
+    apply E_Ass. reflexivity.
+  - simpl in H. apply andb_true_iff in H.
+    destruct H as [H1 H2]. specialize (IHprog1 H1).
+    specialize (IHprog2 H2). 
+Abort.
+
+Theorem no_whiles_terminating : forall c st,
+  no_whilesR c ->
+  exists st', c / st \\ st'.
+Proof.
+  intros c st H.
+  generalize dependent st. induction c; intros.
+  - exists st. apply E_Skip.
+  - exists (t_update st i (aeval st a)).
+    apply E_Ass. reflexivity.
+  - (* Had to get help online for this case. I was originally doing
+       induction on H (above) when I should have been doing it on c.
+       That allows for inversion on H here in this case. *)
+    inversion H. subst.
+    (* These next two lines are immensely important to remember.
+       I adapted this and made it simpler than the source I found
+       online. I had tried this before, but hadn't specialized with
+       the third argument {st, st'}, which prevented me from actually
+       making use of the hypotheses once specialized. *)
+    specialize (IHc1 H2 st). destruct IHc1 as [st' IHc1].
+    specialize (IHc2 H3 st'). destruct IHc2 as [st'' IHc2].
+    exists st''. apply E_Seq with st'; assumption.
+  - (* Got this case completely on my own, though what I learned in
+       the previous case was crucial here too. I did this a lot simpler
+       than the person who did the source I found online. *)
+    apply no_whiles_eqv in H. simpl in H.
+    apply andb_true_iff in H. destruct H as [H1 H2].
+    apply no_whiles_eqv in H1. apply no_whiles_eqv in H2.
+    specialize (IHc1 H1 st). destruct IHc1 as [st' IHc1].
+    specialize (IHc2 H2 st). destruct IHc2 as [st'' IHc2].
+    destruct (beval st b) eqn:HBranch.
+    + exists st'. apply E_IfTrue; assumption.
+    + exists st''. apply E_IfFalse; assumption.
+  - inversion H.
+Qed.
