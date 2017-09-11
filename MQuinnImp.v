@@ -704,3 +704,61 @@ Proof.
     + exists st''. apply E_IfFalse; assumption.
   - inversion H.
 Qed.
+
+Inductive sinstr : Type :=
+  | SPush : nat -> sinstr
+  | SLoad : id -> sinstr
+  | SPlus : sinstr
+  | SMinus : sinstr
+  | SMult : sinstr.
+
+Fixpoint s_execute (st : state) (stack : list nat)
+                   (prog : list sinstr) : list nat :=
+  match prog with
+  | [] => stack
+  | i::prog' =>
+    match i with
+    | SPush n => s_execute st (n::stack) prog'
+    | SLoad id => s_execute st ((st id)::stack) prog'
+    | SPlus =>
+      match stack with
+      | e1 :: e2 :: stack' => s_execute st ((e2 + e1) :: stack') prog'
+      | _ => []
+      end
+    | SMinus =>
+      match stack with
+      | e1 :: e2 :: stack' => s_execute st ((e2 - e1) :: stack') prog'
+      | _ => []
+      end
+    | SMult =>
+      match stack with
+      | e1 :: e2 :: stack' => s_execute st ((e2 * e1) :: stack') prog'
+      | _ => []
+      end
+    end
+  end.
+
+Example s_execute1 : s_execute empty_state []
+    [SPush 5; SPush 3; SPush 1; SMinus] = [2; 5].
+Proof. reflexivity. Qed.
+
+Example s_execute2 :
+     s_execute (t_update empty_state X 3) [3;4]
+       [SPush 4; SLoad X; SMult; SPlus] = [15; 4].
+Proof. reflexivity. Qed.
+
+Fixpoint s_compile (e : aexp) : list sinstr :=
+  match e with
+  | ANum n => [SPush n]
+  | AId id => [SLoad id]
+  | APlus a1 a2 =>
+      (s_compile a1) ++ (s_compile a2) ++ [SPlus]
+  | AMinus a1 a2 =>
+      (s_compile a1) ++ (s_compile a2) ++ [SMinus]
+  | AMult a1 a2 =>
+      (s_compile a1) ++ (s_compile a2) ++ [SMult]
+  end.
+
+Example s_compile1 : s_compile (AMinus (AId X) (AMult (ANum 2) (AId Y)))
+  = [SLoad X; SPush 2; SLoad Y; SMult; SMinus].
+Proof. reflexivity. Qed.
