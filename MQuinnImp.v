@@ -762,3 +762,29 @@ Fixpoint s_compile (e : aexp) : list sinstr :=
 Example s_compile1 : s_compile (AMinus (AId X) (AMult (ANum 2) (AId Y)))
   = [SLoad X; SPush 2; SLoad Y; SMult; SMinus].
 Proof. reflexivity. Qed.
+
+Theorem s_compile_correct_lem1 :
+  (* Found this lemma online when looking for help; the original
+     author didn't actually finish his/her own s_compile_correct,
+     so this lemma may or not be actually helpful. *)
+  forall (st : state) (stack : list nat) (prog1 prog2 : list sinstr),
+    s_execute st stack (prog1 ++ prog2)
+      = s_execute st (s_execute st stack prog1) prog2.
+Admitted.
+
+Theorem s_compile_correct : forall (st : state) (e : aexp),
+  s_execute st [] (s_compile e) = [ aeval st e ].
+Proof.
+  intros. induction e.
+  - reflexivity.
+  - reflexivity.
+  - simpl. rewrite app_assoc.
+    rewrite (s_compile_correct_lem1 st [] (s_compile e1 ++ s_compile e2) ([SPlus])). 
+    rewrite (s_compile_correct_lem1 st [] (s_compile e1) (s_compile e2)).
+    rewrite IHe1.
+    rewrite <- (s_compile_correct_lem1 st [aeval st e1] (s_compile e2) ([SPlus])).
+    rewrite (s_compile_correct_lem1 st [aeval st e1] (s_compile e2) ([SPlus])).
+    rewrite (app_nil_end (s_compile e2)).
+    rewrite (s_compile_correct_lem1 st [aeval st e1] (s_compile e2) []).
+    Abort. (* Aborting for now, struggled with this for too long. *)
+
