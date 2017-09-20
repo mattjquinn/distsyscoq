@@ -788,3 +788,118 @@ Proof.
     rewrite (s_compile_correct_lem1 st [aeval st e1] (s_compile e2) []).
     Abort. (* Aborting for now, struggled with this for too long. *)
 
+Fixpoint beval_short_circuit_and (st : state) (b : bexp) : bool :=
+  match b with
+  | BTrue => true
+  | BFalse => false
+  | BEq a1 a2 => beq_nat (aeval st a1) (aeval st a2)
+  | BLe a1 a2 => leb (aeval st a1) (aeval st a2)
+  | BNot b1 => negb (beval st b1)
+  | BAnd b1 b2 =>
+    match (beval_short_circuit_and st b1) with
+    | false => false
+    | true => beval st (BAnd BTrue b2)
+    end
+  end.
+
+Theorem beval_short_circuit_and_correct : forall st b,
+  beval st b = beval_short_circuit_and st b.
+Proof.
+  intros. induction b; try reflexivity.
+  - simpl. destruct (beval_short_circuit_and st b1) eqn:EQN.
+    + rewrite IHb1. destruct (beval st b2); reflexivity.
+    + rewrite IHb1. destruct (beval st b2); reflexivity.
+Qed.
+
+Module BreakImp.
+
+Inductive com : Type :=
+  | CSkip : com
+  | CBreak : com
+  | CAss : id -> aexp -> com
+  | CSeq : com -> com -> com
+  | CIf : bexp -> com -> com -> com
+  | CWhile : bexp -> com -> com.
+
+Notation "'SKIP'" :=
+  CSkip.
+Notation "'BREAK'" :=
+  CBreak.
+Notation "x '::=' a" :=
+  (CAss x a) (at level 60).
+Notation "c1 ;; c2" :=
+  (CSeq c1 c2) (at level 80, right associativity).
+Notation "'WHILE' b 'DO' c 'END'" :=
+  (CWhile b c) (at level 80, right associativity).
+Notation "'IFB' c1 'THEN' c2 'ELSE' c3 'FI'" :=
+  (CIf c1 c2 c3) (at level 80, right associativity).
+
+Inductive result : Type :=
+  | SContinue : result
+  | SBreak : result.
+
+Reserved Notation "c1 '/' st '\\' s '/' st'"
+                  (at level 40, st, s at level 39).
+
+Inductive ceval : com -> state -> result -> state -> Prop :=
+  | E_Skip : forall st,
+      CSkip / st \\ SContinue / st
+  | E_Break : forall st,
+      CBreak / st \\ SBreak / st
+  | E_Ass : forall st a1 n x,
+      aeval st a1 = n ->
+      (x ::= a1) / st \\ SContinue / (t_update st x n)
+  | E_IfTrue : forall st st' b c1 c2 r,
+      beval st b = true ->
+      c1 / st \\ r / st' ->
+      (IFB b THEN c1 ELSE c2 FI) / st \\ r / st'
+  | E_IfFalse : forall st st' b c1 c2 r,
+      beval st b = false ->
+      c2 / st \\ r / st' ->
+      (IFB b THEN c1 ELSE c2 FI) / st \\ r / st'
+  | E_SeqBreak : forall c1 c2 st st',
+      c1 / st \\ SBreak / st' ->
+      (c1 ;; c2) / st \\ SBreak / st'
+  | E_SeqContinue : forall c1 c2 st st' st'' r,
+      c1 / st \\ SContinue / st' ->
+      c2 / st' \\ r / st'' ->
+      (c1 ;; c2) / st \\ r / st''
+  | E_WhileEnd : forall b st c,
+      beval st b = false ->
+      (WHILE b DO c END) / st \\ SContinue / st
+  | E_WhileLoopBreak : forall st st' b c,
+      beval st b = true ->
+      c / st \\ SBreak / st' ->
+      (WHILE b DO c END) / st \\ SContinue / st'
+  | E_WhileLoopContinue : forall st st' st'' b c r,
+      beval st b = true ->
+      c / st \\ SContinue / st' ->
+      (WHILE b DO c END) / st' \\ r / st'' ->
+      (WHILE b DO c END) / st \\ SContinue / st''
+where "c1 '/' st '\\' s '/' st'" := (ceval c1 st s st').
+
+Theorem break_ignore : forall c st st' s,
+  (BREAK;; c) / st \\ s / st' ->
+  st = st'.
+Proof.
+  intros. inversion H; subst.
+  - inversion H5. reflexivity.
+  - inversion H2.
+Qed.
+
+Theorem while_continue : forall b c st st' s,
+  (WHILE b DO c END) / st \\ s / st' ->
+  s = SContinue.
+Proof.
+  intros. inversion H; reflexivity.
+Qed.
+
+Theorem while_stops_on_break : forall b c st st',
+  beval st b = true ->
+  c / st \\ SBreak / st' ->
+  (WHILE b DO c END) / st \\ SContinue / st'.
+Proof.
+  intros. apply E_WhileLoopBreak.
+  - apply H.
+  - apply H0.
+Qed.
