@@ -871,10 +871,10 @@ Inductive ceval : com -> state -> result -> state -> Prop :=
       beval st b = true ->
       c / st \\ SBreak / st' ->
       (WHILE b DO c END) / st \\ SContinue / st'
-  | E_WhileLoopContinue : forall st st' st'' b c r,
+  | E_WhileLoopContinue : forall st st' st'' b c,
       beval st b = true ->
       c / st \\ SContinue / st' ->
-      (WHILE b DO c END) / st' \\ r / st'' ->
+      (WHILE b DO c END) / st' \\ SContinue / st'' ->
       (WHILE b DO c END) / st \\ SContinue / st''
 where "c1 '/' st '\\' s '/' st'" := (ceval c1 st s st').
 
@@ -903,3 +903,28 @@ Proof.
   - apply H.
   - apply H0.
 Qed.
+
+Theorem while_break_true : forall b c st st',
+  (WHILE b DO c END) / st \\ SContinue / st' ->
+  beval st' b = true ->
+  exists st'', c / st'' \\ SBreak / st'.
+Proof.
+  intros. inversion H.
+  - subst. rewrite H0 in H4. inversion H4.
+  - admit.
+  - subst. exists st'0. Abort.
+(*
+  - intros. exists st'. admit. (* Need contra; SKIP never results in SBreak. *)
+  - intros. exists st'. apply E_Break.
+  - intros. admit. (* Need contra; i ::= a never results in SBreak. *)
+  - intros. specialize (IHc1 st st').
+*)
+
+(*
+   SKIPPING FOR NOW:
+   -> Exercise while_break_true (3 stars)
+   -> Exercise ceval_deterministic (4 stars)
+   -> Exercise add_for_loop (4 stars)
+   due to inability to wrap my mind around what's needed for these
+   at the moment.
+*)
