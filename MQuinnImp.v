@@ -928,3 +928,5 @@ Proof.
    due to inability to wrap my mind around what's needed for these
    at the moment.
 *)
+
+End BreakImp.
