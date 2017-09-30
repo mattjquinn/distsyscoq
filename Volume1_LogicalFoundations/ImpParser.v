@@ -1,3 +1,23 @@
+(** * ImpParser: Lexing and Parsing in Coq *)
+
+(** The development of the Imp language in [Imp.v] completely ignores
+    issues of concrete syntax -- how an ascii string that a programmer
+    might write gets translated into abstract syntax trees defined by
+    the datatypes [aexp], [bexp], and [com].  In this chapter, we
+    illustrate how the rest of the story can be filled in by building
+    a simple lexical analyzer and parser using Coq's functional
+    programming facilities.
+
+    It is not important to understand all the details here (and
+    accordingly, the explanations are fairly terse and there are no
+    exercises).  The main point is simply to demonstrate that it can
+    be done.  You are invited to look through the code -- most of it
+    is not very complicated, though the parser relies on some
+    "monadic" programming idioms that may require a little work to
+    make out -- but most readers will probably want to just skim down
+    to the Examples section at the very end to get the punchline. *)
+
+
 Set Warnings "-notation-overridden,-parsing,-deprecated-implicit-arguments".
 Require Import Coq.Strings.String.
 Require Import Coq.Strings.Ascii.
@@ -5,7 +25,7 @@ Require Import Coq.Arith.Arith.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.Lists.List.
 Import ListNotations.
-Require Import MQuinnMaps MQuinnImp.
+Require Import Maps Imp.
 
 (* ################################################################# *)
 (** * Internals *)
@@ -386,6 +406,10 @@ Definition parse (str : string) : optionE (com * list token) :=
   let tokens := tokenize str in
   parseSequencedCommand bignumber tokens.
 
+(* ################################################################# *)
+(** * Examples *)
+
+(*
 Compute parse "
   IF x == y + 1 + 2 - y * 6 + 3 THEN
     x := x * 1;;
@@ -393,7 +417,18 @@ Compute parse "
   ELSE
     SKIP
   END  ".
+====>
+  SomeE
+     (IFB BEq (AId (Id 0))
+              (APlus
+                 (AMinus (APlus (APlus (AId (Id 1)) (ANum 1)) (ANum 2))
+                    (AMult (AId (Id 1)) (ANum 6)))
+                 (ANum 3))
+      THEN Id 0 ::= AMult (AId (Id 0)) (ANum 1);; Id 1 ::= ANum 0
+      ELSE SKIP FI, [])
+*)
 
+(*
 Compute parse "
   SKIP;;
   z:=x*y*(x*x);;
@@ -407,3 +442,52 @@ Compute parse "
     SKIP
   END;;
   x:=z  ".
+====>
+  SomeE
+     (SKIP;;
+      Id 0 ::= AMult (AMult (AId (Id 1)) (AId (Id 2)))
+                     (AMult (AId (Id 1)) (AId (Id 1)));;
+      WHILE BEq (AId (Id 1)) (AId (Id 1)) DO
+        IFB BAnd (BLe (AId (Id 0)) (AMult (AId (Id 0)) (AId (Id 0))))
+                  (BNot (BEq (AId (Id 1)) (ANum 2)))
+           THEN Id 1 ::= AId (Id 0);; Id 2 ::= AId (Id 0)
+           ELSE SKIP FI;;
+        SKIP
+      END;;
+      Id 1 ::= AId (Id 0),
+     [])
+*)
+
+(*
+Compute parse "
+  SKIP;;
+  z:=x*y*(x*x);;
+  WHILE x==x DO
+    IF z <= z*z && not x == 2 THEN
+      x := z;;
+      y := z
+    ELSE
+      SKIP
+    END;;
+    SKIP
+  END;;
+  x:=z  ".
+=====>
+  SomeE
+     (SKIP;;
+      Id 0 ::= AMult (AMult (AId (Id 1)) (AId (Id 2)))
+            (AMult (AId (Id 1)) (AId (Id 1)));;
+      WHILE BEq (AId (Id 1)) (AId (Id 1)) DO
+        IFB BAnd (BLe (AId (Id 0)) (AMult (AId (Id 0)) (AId (Id 0))))
+                 (BNot (BEq (AId (Id 1)) (ANum 2)))
+          THEN Id 1 ::= AId (Id 0);;
+               Id 2 ::= AId (Id 0)
+          ELSE SKIP
+        FI;;
+        SKIP
+      END;;
+      Id 1 ::= AId (Id 0),
+     []).
+*)
+
+(** $Date: 2017-09-06 10:45:52 -0400 (Wed, 06 Sep 2017) $ *)
