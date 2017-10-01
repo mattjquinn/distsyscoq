@@ -121,3 +121,18 @@ Example pup_to_n_1 :
   test_ceval (t_update empty_state X 5) pup_to_n = Some (0, 15, 0).
 Proof. reflexivity. Qed.
 
+Definition peven : com :=
+  WHILE (BAnd (BNot (BEq (ANum 0) (AId X)))
+              (BNot (BEq (ANum 1) (AId X)))) DO
+    X ::= (AMinus (AId X) (ANum 2))
+  END ;;
+  IFB (BEq (AId X) (ANum 1)) THEN
+    Z ::= ANum 1
+  ELSE
+    Z ::= ANum 0
+  FI.
+
+Compute (test_ceval (t_update empty_state X 6) peven).
+Compute (test_ceval (t_update empty_state X 7) peven).
+Compute (test_ceval (t_update empty_state X 8) peven).
+Compute (test_ceval (t_update empty_state X 9) peven).
