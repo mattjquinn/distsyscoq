@@ -1,6 +1,7 @@
 Require Import Coq.omega.Omega.
 Require Import Coq.Arith.Arith.
-Require Import MQuinnImp MQuinnMaps.
+Require Import MQuinnImp.
+Require Import MQuinnMaps.
 
 Fixpoint ceval_step1 (st : state) (c : com) : state :=
   match c with
@@ -136,3 +137,47 @@ Compute (test_ceval (t_update empty_state X 6) peven).
 Compute (test_ceval (t_update empty_state X 7) peven).
 Compute (test_ceval (t_update empty_state X 8) peven).
 Compute (test_ceval (t_update empty_state X 9) peven).
+
+Theorem ceval_step__ceval : forall c st st',
+  (exists i, ceval_step st c i = Some st') ->
+  c / st \\ st'.
+Proof.
+  intros c st st' H.
+  inversion H as [i E].
+  clear H.
+  generalize dependent st'.
+  generalize dependent st.
+  generalize dependent c.
+  induction i as [| i' ].
+  - intros c st st' H. inversion H.
+  - intros c st st' H.
+    destruct c; simpl in H; inversion H; subst; clear H.
+    + apply E_Skip.
+    + apply E_Ass. reflexivity.
+    + destruct (ceval_step st c1 i') eqn:Heqr1.
+      * (* Evaluation of r1 terminates normally. *)
+        apply E_Seq with s.
+          apply IHi'. apply Heqr1.
+          apply IHi'. assumption.
+      * (* Otherwise, contradiction. *)
+        inversion H1.
+    + destruct (beval st b) eqn:HEqr.
+      * (* r = true *)
+        apply E_IfTrue. rewrite HEqr. reflexivity.
+        apply IHi'. apply H1.
+      * (* r = false *)
+        apply E_IfFalse. rewrite HEqr. reflexivity.
+        apply IHi'. apply H1.
+    + destruct (beval st b) eqn:HEqr.
+      * (* r = true *)
+        destruct (ceval_step st c i') eqn:Heqr1.
+        { (* r1 = Some s *)
+          apply E_WhileLoop with s. rewrite HEqr. reflexivity.
+          apply IHi'. apply Heqr1.
+          apply IHi'. apply H1. }
+        { (* r1 = None *) inversion H1. }
+      * (* r = false *)
+        inversion H1.
+        apply E_WhileEnd. rewrite <- HEqr. subst.
+        reflexivity. Qed.
+
