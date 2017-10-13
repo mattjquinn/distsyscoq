@@ -155,7 +155,7 @@ Proof.
     + apply E_Skip.
     + apply E_Ass. reflexivity.
     + destruct (ceval_step st c1 i') eqn:Heqr1.
-      * (* Evaluation of r1 terminates normally. *)
+      * (* Evaluation of c1 terminates normally. *)
         apply E_Seq with s.
           apply IHi'. apply Heqr1.
           apply IHi'. assumption.
@@ -180,4 +180,49 @@ Proof.
         inversion H1.
         apply E_WhileEnd. rewrite <- HEqr. subst.
         reflexivity. Qed.
+
+(* Exercise: ceval_step__ceval_inf
+   Theorem: For all c st st',
+   if there exists an i st. ceval_step st c i = Some st',
+   then c / st \\ st'.
+
+   Proof: by induction on i.
+     - Base case: i = 0.
+       Then our assumption states that ceval_step st c 0 = Some st'.
+       But if i is 0, ceval_step yields None, not Some st', so
+       we dispose of this contradictory case.
+     - Inductive case: i = (S i').
+       Then our assumption states that ceval_step st c' = Some st',
+       and our inductive assumption states that
+       for all c, st, st', ceval_step st c i' = Some st' -> c / st \\ st'.
+
+       We proceed by case analysis on c:
+       - Case SKIP : trivial, by definition.
+       - Case (i ::= a) : trivial, by definition.
+       - Case (c1 ;; c2) : If c1 terminates normally, the inductive
+         hypothesis tells us that applying ceval_step to this same
+         c1 yields the same final state s. Then for c2, applying
+         the inductive hypothesis tells us that applying ceval_step
+         to c2 takes us from s to st', which matches our assumption.
+         We dispense with the possibility that c1 *doesn't* terminate
+         normally, as this contradicts our assumption that c2
+         terminates normally.
+       - Case IF statement: We case analyze the boolean expression
+         of the conditional to reach both statement bodies; for both,
+         proof proceeds by applying the inductive hypothesis to get
+         restatements of the goal in terms of ceval_step, which follow
+         immediately by assumption.
+       - Case WHILE statement: We case analyze the boolean expresion
+         of the conditional. If the expression is true, the loop either
+         takes a step (and modifies the state) or doesn't. The former
+         proceeds as usual by application of our inductive hypothesis,
+         followed by assumption. The latter is a contradiction; we assume
+         the WHILE statement as a whole modifies the state, which is
+         not possible if the loop doesn't take a step, so we dispense
+         with it.
+         If the boolean expression is false, then the WHILE statement as
+         a whole returns unmodified the state in which the expression is
+         false, which follows from our definition of the evaluation
+         of WHILE.
+*)
 
