@@ -226,3 +226,54 @@ Proof.
          of WHILE.
 *)
 
+Theorem ceval_step_more : forall i1 i2 st st' c,
+  i1 <= i2 ->
+  ceval_step st c i1 = Some st' ->
+  ceval_step st c i2 = Some st'.
+Proof.
+  induction i1 as [| i1']; intros i2 st st' c Hle Hceval.
+  - inversion Hceval.
+  - destruct i2 as [| i2']. inversion Hle.
+    assert (Hle' : i1' <= i2') by omega.
+    destruct c.
+    + (* SKIP *)
+      simpl in Hceval. inversion Hceval. reflexivity.
+    + (* ::= *)
+      simpl in Hceval. inversion Hceval. simpl. reflexivity.
+    + (* ;; *)
+      simpl in Hceval. simpl.
+      destruct (ceval_step st c1 i1') eqn:Heqst1'o.
+      * (* st1'o = Some *)
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite Heqst1'o. apply IHi1'; assumption.
+      * inversion Hceval.
+    + (* IFB *)
+      simpl in Hceval. simpl. destruct (beval st b);
+      apply (IHi1' i2') in Hceval; assumption.
+    + (* WHILE *)
+      simpl in Hceval. simpl. destruct (beval st b); try assumption.
+      destruct (ceval_step st c i1') eqn:Heqst1'o.
+      * (* st1'o = Some *)
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite Heqst1'o. apply IHi1'; assumption.
+      * inversion Hceval.
+Qed.
+
+Theorem ceval__ceval_step : forall c st st',
+  c / st \\ st' ->
+  exists i, ceval_step st c i = Some st'.
+Proof.
+  intros c st st' Hce. induction Hce.
+  - exists 1. simpl. reflexivity.
+  - exists 1. simpl. rewrite H. reflexivity.
+  - destruct IHHce1 as [i1 IHHce1].
+    destruct IHHce2 as [i2 IHHce2].
+    admit.
+  - destruct IHHce as [i IHHce].
+    rewrite <- IHHce. exists i.
+    destruct i.
+    + reflexivity.
+    + simpl. destruct (beval st b).
+      * destruct c1.
+Abort. (* Getting impatient, so aborting for now to move on to
+          extraction and automation chapters. *)
