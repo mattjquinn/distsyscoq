@@ -296,3 +296,48 @@ Proof.
     induction E1; intros st2 E2; inv E2; repeat find_eqn; try find_rwinv;
       auto.
 Qed.
+
+End Repeat.
+
+Example ceval_example1:
+    (X ::= ANum 2;;
+     IFB BLe (AId X) (ANum 1)
+       THEN Y ::= ANum 3
+       ELSE Z ::= ANum 4
+     FI)
+   / empty_state
+   \\ (t_update (t_update empty_state X 2) Z 4).
+Proof.
+  (* We supply the intermediate state st'... *)
+  apply E_Seq with (t_update empty_state X 2).
+  - apply E_Ass. reflexivity.
+  - apply E_IfFalse. reflexivity. apply E_Ass. reflexivity.
+Qed.
+
+Example ceval_example1':
+    (X ::= ANum 2;;
+     IFB BLe (AId X) (ANum 1)
+       THEN Y ::= ANum 3
+       ELSE Z ::= ANum 4
+     FI)
+   / empty_state
+   \\ (t_update (t_update empty_state X 2) Z 4).
+Proof.
+  eapply E_Seq.
+  - apply E_Ass. reflexivity.
+  - apply E_IfFalse. reflexivity. apply E_Ass. reflexivity.
+Qed.
+
+Hint Constructors ceval.
+Hint Transparent state.
+Hint Transparent total_map.
+
+Definition st12 := t_update (t_update empty_state X 1) Y 2.
+Definition st21 := t_update (t_update empty_state X 2) Y 1.
+
+Example auto_example_8 : exists s',
+  (IFB (BLe (AId X) (AId Y))
+    THEN (Z ::= AMinus (AId Y) (AId X))
+    ELSE (Y ::= APlus (AId X) (AId Z))
+  FI) / st21 \\ s'.
+Proof. eauto. Qed.
