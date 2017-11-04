@@ -83,3 +83,39 @@ Proof.
     + assumption.
   - inversion HBFalse. apply E_IfFalse; assumption.
 Qed.
+
+Theorem swap_if_branches : forall b e1 e2,
+  cequiv (IFB b THEN e1 ELSE e2 FI)
+         (IFB BNot b THEN e2 ELSE e1 FI).
+Proof.
+  intros b e1 e2 st st'. split; intros H.
+  - inversion H; subst.
+    + apply E_IfFalse.
+      * simpl. rewrite H5. reflexivity.
+      * assumption.
+    + apply E_IfTrue.
+      * simpl. rewrite H5. reflexivity.
+      * assumption.
+  - inversion H; subst; simpl in *.
+    + apply E_IfFalse.
+      * simpl. symmetry in H5. apply negb_sym in H5.
+        rewrite H5. reflexivity.
+      * assumption.
+    + apply E_IfTrue.
+      * simpl. symmetry in H5. apply negb_sym in H5.
+        rewrite H5. reflexivity.
+      * assumption.
+Qed.
+
+Theorem WHILE_false : forall b c,
+  bequiv b BFalse ->
+    cequiv (WHILE b DO c END) SKIP.
+Proof.
+  intros b c HBFalse st st'. split; intros H; unfold bequiv in HBFalse.
+  - inversion H; subst.
+    + apply E_Skip.
+    + rewrite HBFalse in H2. inversion H2.
+  - inversion H. subst. apply E_WhileEnd.
+    rewrite HBFalse. reflexivity.
+Qed.
+
