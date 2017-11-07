@@ -292,3 +292,41 @@ Definition prog_i : com :=
 Definition equiv_classes : list (list com) :=
   [ [prog_a; prog_d; prog_f; prog_g] ; [prog_b] ;
     [prog_c; prog_h] ; [prog_e] ; [prog_i] ].
+
+Lemma refl_aequiv : forall (a : aexp), aequiv a a.
+Proof. unfold aequiv. intros. reflexivity. Qed.
+
+Lemma sym_equiv : forall (a1 a2 : aexp),
+  aequiv a1 a2 -> aequiv a2 a1.
+Proof. unfold aequiv. intros. symmetry. apply H. Qed.
+
+Lemma trans_equiv : forall (a1 a2 a3 : aexp),
+  aequiv a1 a2 -> aequiv a2 a3 -> aequiv a1 a3.
+Proof. unfold aequiv. intros. rewrite H. apply H0. Qed.
+
+Lemma refl_bequiv : forall (b : bexp), bequiv b b.
+Proof. unfold bequiv. intros. reflexivity. Qed.
+
+Lemma sym_bequiv : forall (b1 b2 : bexp),
+  bequiv b1 b2 -> bequiv b2 b1.
+Proof. unfold bequiv. intros. symmetry. apply H. Qed.
+
+Lemma trans_bequiv : forall (b1 b2 b3 : bexp),
+  bequiv b1 b2 -> bequiv b2 b3 -> bequiv b1 b3.
+Proof. unfold bequiv. intros. rewrite H. apply H0. Qed.
+
+Lemma refl_cequiv : forall (c : com), cequiv c c.
+Proof. unfold cequiv. intros. reflexivity. Qed.
+
+Lemma sym_cequiv : forall (c1 c2 : com),
+  cequiv c1 c2 -> cequiv c2 c1.
+Proof. unfold cequiv. intros. symmetry. apply H. Qed.
+
+Lemma iff_trans : forall (P1 P2 P3 : Prop),
+  (P1 <-> P2) -> (P2 <-> P3) -> (P1 <-> P3).
+Proof. intros. rewrite H. apply H0. Qed.
+
+Lemma trans_cequiv : forall (c1 c2 c3 : com),
+  cequiv c1 c2 -> cequiv c2 c3 -> cequiv c1 c3.
+Proof. unfold cequiv. intros.
+  apply iff_trans with (c2 / st \\ st'). apply H. apply H0. Qed.
