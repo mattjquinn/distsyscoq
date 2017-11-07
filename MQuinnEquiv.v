@@ -230,3 +230,65 @@ Proof.
      [via our assumption that (AId X) and e are equivalent expressions]
      as necessary to prove its reduction to starting state st. *)
 Qed.
+
+Definition prog_a : com :=
+  WHILE BNot (BLe (AId X) (ANum 0)) DO
+    X ::= APlus (AId X) (ANum 1)
+  END.
+  (* While X > 0, x = x + 1 (INFINITE LOOP). *)
+
+Definition prog_b : com :=
+  IFB BEq (AId X) (ANum 0) THEN
+    X ::= APlus (AId X) (ANum 1);;
+    Y ::= ANum 1
+  ELSE
+    Y ::= ANum 0
+  FI;;
+  X ::= AMinus (AId X) (AId Y);;
+  Y ::= ANum 0.
+  (* If X is 0, then X and Y are set to 1.
+      otherwise, X remains same and Y is set to 0.
+     X is set to X - Y.
+     Y is set to 0. *)
+
+Definition prog_c : com :=
+  SKIP.
+
+Definition prog_d : com :=
+  WHILE BNot (BEq (AId X) (ANum 0)) DO
+    X ::= APlus (AMult (AId X) (AId Y)) (ANum 1)
+  END.
+  (* While X != 0, X is set to (X*Y) + 1. (INFINITE LOOP) *)
+
+Definition prog_e : com :=
+  Y ::= ANum 0.
+  (* Y is set to 0. *)
+
+Definition prog_f : com :=
+  Y ::= APlus (AId X) (ANum 1);;
+  WHILE BNot (BEq (AId X) (AId Y)) DO
+    Y ::= APlus (AId X) (ANum 1)
+  END.
+  (* Y is set to X + 1.
+     While X != Y, Y is set to X + 1. (INFINITE LOOP) *)
+
+Definition prog_g : com :=
+  WHILE BTrue DO
+    SKIP
+  END. (* INFINITE LOOP *)
+
+Definition prog_h : com :=
+  WHILE BNot (BEq (AId X) (AId X)) DO
+    X ::= APlus (AId X) (ANum 1)
+  END. (* While X != X, X = X + 1 (EQUIV TO SKIP) *)
+
+Definition prog_i : com :=
+  WHILE BNot (BEq (AId X) (AId Y)) DO
+    X ::= APlus (AId Y) (ANum 1)
+  END. (* While X != Y, X = Y + 1.
+          (Equivalent to SKIP or INFINITE LOOP depending
+           on initial state. *)
+
+Definition equiv_classes : list (list com) :=
+  [ [prog_a; prog_d; prog_f; prog_g] ; [prog_b] ;
+    [prog_c; prog_h] ; [prog_e] ; [prog_i] ].
