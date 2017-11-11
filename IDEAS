@@ -1,0 +1,32 @@
+Software for intersections supporting self-driving cars:
+ https://www.nytimes.com/interactive/2017/11/08/magazine/tech-design-autonomous-future-cars-100-percent-augmented-reality-policing.html
+
+
+Primary <-> Backup
+
+P increments counter
+P sends counter to B via single bidirectional FIFO channel
+B receives counter via channel
+B increments counter
+
+Safety Property:
+- Backup counter never exceeds Primary's
+
+PROOF STEPS
+-> Definitions
+-> Define step-relation
+-> Examples of traces with step-relation
+   applied to show end result
+-> Proof that safety property holds for
+   any nodes P and B
+
+
+ONCE BASICS WORK:
+
+Step-relation on channel
+-> no change
+-> drops packet
+-> reorders packets (removes FIFO constraint)
+
+WHICH REQUIRES
+-> sequence number on packets to prevent outdated packets from being read
