@@ -330,3 +330,36 @@ Lemma trans_cequiv : forall (c1 c2 c3 : com),
   cequiv c1 c2 -> cequiv c2 c3 -> cequiv c1 c3.
 Proof. unfold cequiv. intros.
   apply iff_trans with (c2 / st \\ st'). apply H. apply H0. Qed.
+
+Theorem CAss_congruence : forall i a1 a1',
+  aequiv a1 a1' ->
+  cequiv (CAss i a1) (CAss i a1').
+Proof.
+  intros i a1 a1' HAEquiv st st'. unfold aequiv in HAEquiv.
+  split; intros H; inversion H; subst.
+  - rewrite HAEquiv. apply E_Ass. reflexivity.
+  - rewrite <- HAEquiv. apply E_Ass. reflexivity.
+Qed.
+
+Theorem CWhile_congruence : forall b1 b1' c1 c1',
+  bequiv b1 b1' -> cequiv c1 c1' ->
+  cequiv (WHILE b1 DO c1 END) (WHILE b1' DO c1' END).
+Proof.
+  unfold bequiv, cequiv.
+  intros b1 b1' c1 c1' HBequiv HCequiv st st'.
+  split; intros Hce.
+  - remember (WHILE b1 DO c1 END) as cwhile eqn:Heqcwhile.
+    induction Hce; inversion Heqcwhile; subst.
+    + rewrite HBequiv in H. apply E_WhileEnd. assumption.
+    + apply E_WhileLoop with st'.
+      * rewrite HBequiv in H. assumption.
+      * rewrite HCequiv in Hce1. assumption.
+      * apply IHHce2. reflexivity.
+  - remember (WHILE b1' DO c1' END) as cwhile eqn:Heqcwhile'.
+    induction Hce; inversion Heqcwhile'; subst.
+    + rewrite <- HBequiv in H. apply E_WhileEnd. assumption.
+    + apply E_WhileLoop with st'.
+      * rewrite <- HBequiv in H. assumption.
+      * rewrite <- HCequiv in Hce1. apply Hce1.
+      * apply IHHce2. reflexivity.
+Qed.
