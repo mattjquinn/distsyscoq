@@ -363,3 +363,79 @@ Proof.
       * rewrite <- HCequiv in Hce1. apply Hce1.
       * apply IHHce2. reflexivity.
 Qed.
+
+Theorem CSeq_congruence : forall c1 c1' c2 c2',
+  cequiv c1 c1' ->
+  cequiv c2 c2' ->
+  cequiv (c1;;c2) (c1';;c2').
+Proof.
+  unfold cequiv. intros. split; intros H1; inversion H1; subst.
+  - apply E_Seq with st'0.
+    + apply H. apply H4.
+    + apply H0. apply H7.
+  - apply E_Seq with st'0.
+    + apply H. apply H4.
+    + apply H0. apply H7.
+Qed.
+
+Theorem CIf_congruence : forall b b' c1 c1' c2 c2',
+  bequiv b b' ->
+  cequiv c1 c1' ->
+  cequiv c2 c2' ->
+  cequiv (IFB b THEN c1 ELSE c2 FI)
+         (IFB b' THEN c1' ELSE c2' FI).
+Proof.
+  unfold bequiv, cequiv. intros. split; intros H2.
+  - remember (IFB b THEN c1 ELSE c2 FI) as ifstmt eqn:Hifstmt.
+    induction H2; inversion Hifstmt; subst.
+    + apply E_IfTrue.
+      * rewrite H in H2. assumption.
+      * apply H0 in H3. assumption.
+    + apply E_IfFalse.
+      * rewrite H in H2. assumption.
+      * apply H1. assumption.
+  - remember (IFB b' THEN c1' ELSE c2' FI) as ifstmt eqn:Hifstmt'.
+    induction H2; inversion Hifstmt'; subst.
+    + apply E_IfTrue.
+      * rewrite <- H in H2. assumption.
+      * apply H0 in H3. assumption.
+    + apply E_IfFalse.
+      * rewrite <- H in H2. assumption.
+      * apply H1 in H3. assumption.
+Qed.
+
+Example congruence_example:
+  cequiv
+    (* Program 1: *)
+    (X ::= ANum 0;;
+     IFB (BEq (AId X) (ANum 0))
+     THEN
+       Y ::= ANum 0
+     ELSE
+       Y ::= ANum 42
+     FI)
+    (* Program 2: *)
+    (X ::= ANum 0;;
+     IFB (BEq (AId X) (ANum 0))
+     THEN
+       Y ::= AMinus (AId X) (AId X) (* <--- changed here *)
+     ELSE
+       Y ::= ANum 42
+     FI).
+Proof.
+  apply CSeq_congruence.
+  - apply refl_cequiv.
+  - apply CIf_congruence.
+    + apply refl_bequiv.
+    + apply CAss_congruence. unfold aequiv. simpl.
+      intros. apply minus_diag_reverse.
+    + apply refl_cequiv.
+Qed.
+
+(* Exercise: not_congr: 
+   We've shown that the cequiv relation is both an equivalence
+   and a congruence on commands. Can you think of a relation on
+   commands that is an equivalence but not a congruence?
+
+   Answer: No, b/c I'm too lazy to do so at this time.
+*)
