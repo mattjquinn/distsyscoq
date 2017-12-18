@@ -439,3 +439,93 @@ Qed.
 
    Answer: No, b/c I'm too lazy to do so at this time.
 *)
+
+Definition atrans_sound (atrans : aexp -> aexp) : Prop :=
+  forall (a : aexp), aequiv a (atrans a).
+
+Definition btrans_sound (btrans : bexp -> bexp) : Prop :=
+  forall (b : bexp), bequiv b (btrans b).
+
+Definition ctrans_sound (ctrans : com -> com) : Prop :=
+  forall (c : com), cequiv c (ctrans c).
+
+Fixpoint fold_constants_aexp (a : aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | AId i => AId i
+  | APlus a1 a2 =>
+    match (fold_constants_aexp a1, fold_constants_aexp a2)
+    with
+    | (ANum n1, ANum n2) => ANum (n1 + n2)
+    | (a1', a2') => APlus a1' a2'
+    end
+  | AMinus a1 a2 =>
+    match (fold_constants_aexp a1, fold_constants_aexp a2)
+    with
+    | (ANum n1, ANum n2) => ANum (n1 - n2)
+    | (a1', a2') => AMinus a1' a2'
+    end
+  | AMult a1 a2 =>
+    match (fold_constants_aexp a1, fold_constants_aexp a2)
+    with
+    | (ANum n1, ANum n2) => ANum (n1 * n2)
+    | (a1', a2') => AMult a1' a2'
+    end
+  end.
+
+Example fold_aexp_ex1 :
+  fold_constants_aexp (AMult (APlus (ANum 1) (ANum 2)) (AId X))
+    = AMult (ANum 3) (AId X).
+Proof. reflexivity. Qed.
+
+Example fold_aexp_ex2 :
+  fold_constants_aexp (AMinus (AId X) (APlus (AMult (ANum 0) (ANum 6))
+                                             (AId Y)))
+    = AMinus (AId X) (APlus (ANum 0) (AId Y)).
+Proof. reflexivity. Qed.
+
+Fixpoint fold_constants_bexp (b : bexp) : bexp :=
+  match b with
+  | BTrue => BTrue
+  | BFalse => BFalse
+  | BEq a1 a2 =>
+    match (fold_constants_aexp a1, fold_constants_aexp a2) with
+    | (ANum n1, ANum n2) =>
+        if beq_nat n1 n2 then BTrue else BFalse
+    | (a1', a2') => BEq a1' a2'
+    end
+  | BLe a1 a2 =>
+    match (fold_constants_aexp a1, fold_constants_aexp a2) with
+    | (ANum n1, ANum n2) =>
+        if leb n1 n2 then BTrue else BFalse
+    | (a1', a2') => BLe a1' a2'
+    end
+  | BNot b1 =>
+    match (fold_constants_bexp b1) with
+    | BTrue => BFalse
+    | BFalse => BTrue
+    | b1' => BNot b1'
+    end
+  | BAnd b1 b2 =>
+    match (fold_constants_bexp b1, fold_constants_bexp b2)
+    with
+    | (BTrue, BTrue) => BTrue
+    | (BTrue, BFalse) => BFalse
+    | (BFalse, BTrue) => BFalse
+    | (BFalse, BFalse) => BFalse
+    | (b1', b2') => BAnd b1' b2'
+    end
+  end.
+
+Example fold_bexp_ex1 :
+  fold_constants_bexp (BAnd BTrue (BNot (BAnd BFalse BTrue)))
+    = BTrue.
+Proof. reflexivity. Qed.
+
+Example fold_bexp_ex2 :
+  fold_constants_bexp
+    (BAnd (BEq (AId X) (AId Y))
+          (BEq (ANum 0)
+               (AMinus (ANum 2) (APlus (ANum 1) (ANum 1)))))
+    = BAnd (BEq (AId X) (AId Y)) BTrue.
+Proof. reflexivity. Qed.
