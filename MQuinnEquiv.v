@@ -585,3 +585,48 @@ Example fold_com_ex1 :
        X ::= APlus (AId X) (ANum 1)
      END).
 Proof. reflexivity. Qed.
+
+Theorem fold_constants_aexp_sound :
+  atrans_sound fold_constants_aexp.
+Proof.
+  unfold atrans_sound. intro a. unfold aequiv. intro st.
+  induction a; simpl; try reflexivity;
+  try (destruct (fold_constants_aexp a1);
+       destruct (fold_constants_aexp a2);
+       simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+Qed.
+
+Theorem fold_constants_bexp_sound:
+  btrans_sound fold_constants_bexp.
+Proof.
+  unfold btrans_sound. intros b. unfold bequiv. intros st.
+  induction b;
+    try reflexivity.
+  - rename a into a1. rename a0 into a2. simpl.
+    remember (fold_constants_aexp a1) as a1' eqn:Heqa1'.
+    remember (fold_constants_aexp a2) as a2' eqn:Heqa2'.
+    replace (aeval st a1) with (aeval st a1') by
+      (subst a1'; rewrite <- fold_constants_aexp_sound; reflexivity).
+    replace (aeval st a2) with (aeval st a2') by
+      (subst a2'; rewrite <- fold_constants_aexp_sound; reflexivity).
+    destruct a1'; destruct a2'; try reflexivity.
+    (* The only interesting case is when both a1 and a2
+       become constants after folding *)
+    simpl. destruct (beq_nat n n0); reflexivity.
+  - rename a into a1. rename a0 into a2. simpl.
+    remember (fold_constants_aexp a1) as a1' eqn:Heqa1'.
+    remember (fold_constants_aexp a2) as a2' eqn:Heqa2'.
+    replace (aeval st a1) with (aeval st a1') by
+      (subst a1'; rewrite <- fold_constants_aexp_sound; reflexivity).
+    replace (aeval st a2) with (aeval st a2') by
+      (subst a2'; rewrite <- fold_constants_aexp_sound; reflexivity).
+    destruct a1'; destruct a2'; try reflexivity.
+    (* The only interesting case is when both a1 and a2
+       become constants after folding *)
+    simpl. destruct (leb n n0); reflexivity.
+  - simpl. destruct (fold_constants_bexp b); rewrite IHb; simpl;
+      try reflexivity.
+  - simpl. destruct (fold_constants_bexp b1);
+           destruct (fold_constants_bexp b2);
+           rewrite IHb1; rewrite IHb2; simpl; reflexivity.
+Qed.
