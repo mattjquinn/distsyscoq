@@ -630,3 +630,25 @@ Proof.
            destruct (fold_constants_bexp b2);
            rewrite IHb1; rewrite IHb2; simpl; reflexivity.
 Qed.
+
+Theorem fold_constants_com_sound : ctrans_sound fold_constants_com.
+Proof.
+  unfold ctrans_sound. intros c. induction c; simpl.
+  - apply refl_cequiv.
+  - apply CAss_congruence. apply fold_constants_aexp_sound.
+  - apply CSeq_congruence; assumption.
+  - assert (bequiv b (fold_constants_bexp b)). {
+      apply fold_constants_bexp_sound. }
+    destruct (fold_constants_bexp b) eqn:Heqb;
+      try (apply CIf_congruence; assumption).
+    + apply trans_cequiv with c1; try assumption.
+        apply IFB_true; assumption.
+    + apply trans_cequiv with c2; try assumption.
+        apply IFB_false; assumption.
+  - assert (bequiv b (fold_constants_bexp b)). {
+      apply fold_constants_bexp_sound. }
+    destruct (fold_constants_bexp b) eqn:Heqb;
+      try (apply CWhile_congruence; assumption).
+    + apply WHILE_true. assumption.
+    + apply WHILE_false. assumption.
+Qed.
