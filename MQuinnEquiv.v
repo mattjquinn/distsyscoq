@@ -728,3 +728,17 @@ Proof.
   - rewrite IHb. reflexivity.
   - rewrite IHb1. rewrite IHb2. reflexivity.
 Qed.
+
+Theorem optimize_0plus_com_sound :
+  ctrans_sound optimize_0plus_com.
+Proof.
+  unfold ctrans_sound. intro c. induction c.
+  - simpl. apply refl_cequiv.
+  - simpl. apply CAss_congruence.
+    apply optimize_0plus_aexp_sound.
+  - simpl. apply CSeq_congruence; assumption.
+  - simpl. apply CIf_congruence; try assumption.
+      apply optimize_0plus_bexp_sound.
+  - simpl. apply CWhile_congruence; try assumption.
+      apply optimize_0plus_bexp_sound.
+Qed.
