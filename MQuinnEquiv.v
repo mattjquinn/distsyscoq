@@ -652,3 +652,59 @@ Proof.
     + apply WHILE_true. assumption.
     + apply WHILE_false. assumption.
 Qed.
+
+Fixpoint optimize_0plus_aexp (a : aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | AId id => AId id
+  | APlus (ANum 0) a2 => optimize_0plus_aexp a2
+  | APlus a1 a2 =>
+      APlus (optimize_0plus_aexp a1) (optimize_0plus_aexp a2)
+  | AMinus a1 a2 =>
+      AMinus (optimize_0plus_aexp a1) (optimize_0plus_aexp a2)
+  | AMult a1 a2 =>
+      AMult (optimize_0plus_aexp a1) (optimize_0plus_aexp a2)
+  end.
+
+Fixpoint optimize_0plus_bexp (b : bexp) : bexp :=
+  match b with
+  | BTrue => BTrue
+  | BFalse => BFalse
+  | BEq a1 a2 =>
+      BEq (optimize_0plus_aexp a1) (optimize_0plus_aexp a2)
+  | BLe a1 a2 =>
+      BLe (optimize_0plus_aexp a1) (optimize_0plus_aexp a2)
+  | BNot b1 =>
+      BNot (optimize_0plus_bexp b1)
+  | BAnd b1 b2 =>
+      BAnd (optimize_0plus_bexp b1) (optimize_0plus_bexp b2)
+  end.
+
+Fixpoint optimize_0plus_com (c : com) : com :=
+  match c with
+  | SKIP => SKIP
+  | i ::= a => i ::= (optimize_0plus_aexp a)
+  | c1 ;; c2 =>
+      (optimize_0plus_com c1) ;; (optimize_0plus_com c2)
+  | IFB b THEN c1 ELSE c2 FI =>
+      IFB (optimize_0plus_bexp b)
+      THEN (optimize_0plus_com c1)
+      ELSE (optimize_0plus_com c2)
+      FI
+  | WHILE b DO c END =>
+      WHILE (optimize_0plus_bexp b)
+      DO (optimize_0plus_com c)
+      END
+  end.
+
+Theorem optimize_0plus_aexp_sound :
+  atrans_sound optimize_0plus_aexp.
+Proof.
+  unfold atrans_sound. intro a. unfold aequiv. intro st.
+  (* remember (optimize_0plus_aexp a) as aexpOpt eqn:aexOptEqn. *)
+  induction a; try reflexivity;
+    try (simpl; destruct a1;
+      try (rewrite IHa1; rewrite IHa2; reflexivity)).
+  - simpl. destruct n;
+      simpl; rewrite IHa2; reflexivity.
+Qed.
