@@ -708,3 +708,23 @@ Proof.
   - simpl. destruct n;
       simpl; rewrite IHa2; reflexivity.
 Qed.
+
+Theorem optimize_0plus_bexp_sound :
+  btrans_sound optimize_0plus_bexp.
+Proof.
+  unfold btrans_sound. intro b. unfold bequiv. intro st.
+  induction b;
+    simpl; try reflexivity.
+  - assert (aequiv a (optimize_0plus_aexp a)).  {
+    apply optimize_0plus_aexp_sound. }
+    assert (aequiv a0 (optimize_0plus_aexp a0)).  {
+    apply optimize_0plus_aexp_sound. }
+    unfold aequiv in H. rewrite H. rewrite H0. reflexivity.
+  - assert (aequiv a (optimize_0plus_aexp a)).  {
+    apply optimize_0plus_aexp_sound. }
+    assert (aequiv a0 (optimize_0plus_aexp a0)).  {
+    apply optimize_0plus_aexp_sound. }
+    unfold aequiv in H. rewrite H. rewrite H0. reflexivity.
+  - rewrite IHb. reflexivity.
+  - rewrite IHb1. rewrite IHb2. reflexivity.
+Qed.
