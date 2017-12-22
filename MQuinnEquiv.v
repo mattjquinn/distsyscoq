@@ -701,7 +701,6 @@ Theorem optimize_0plus_aexp_sound :
   atrans_sound optimize_0plus_aexp.
 Proof.
   unfold atrans_sound. intro a. unfold aequiv. intro st.
-  (* remember (optimize_0plus_aexp a) as aexpOpt eqn:aexOptEqn. *)
   induction a; try reflexivity;
     try (simpl; destruct a1;
       try (rewrite IHa1; rewrite IHa2; reflexivity)).
@@ -741,4 +740,16 @@ Proof.
       apply optimize_0plus_bexp_sound.
   - simpl. apply CWhile_congruence; try assumption.
       apply optimize_0plus_bexp_sound.
+Qed.
+
+Definition com_optimizer (c : com) : com :=
+  optimize_0plus_com (fold_constants_com c).
+
+Theorem com_optimizer_sound :
+  ctrans_sound com_optimizer.
+Proof.
+  unfold ctrans_sound. unfold com_optimizer. intros c.
+  apply trans_cequiv with (fold_constants_com c).
+  + apply fold_constants_com_sound.
+  + apply optimize_0plus_com_sound.
 Qed.
