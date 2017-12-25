@@ -802,3 +802,69 @@ Proof.
   assert (Hcontra': st1 Y = st2 Y) by (rewrite Hcontra; reflexivity).
   subst. inversion Hcontra'.
 Qed.
+
+Inductive var_not_used_in_aexp (X:id) : aexp -> Prop :=
+  | VNUNum: forall n, var_not_used_in_aexp X (ANum n)
+  | VNUId: forall Y, X <> Y -> var_not_used_in_aexp X (AId Y)
+  | VNUPlus: forall a1 a2,
+      var_not_used_in_aexp X a1 ->
+      var_not_used_in_aexp X a2 ->
+      var_not_used_in_aexp X (APlus a1 a2)
+  | VNUMinus: forall a1 a2,
+      var_not_used_in_aexp X a1 ->
+      var_not_used_in_aexp X a2 ->
+      var_not_used_in_aexp X (AMinus a1 a2)
+  | VNUMult: forall a1 a2,
+      var_not_used_in_aexp X a1 ->
+      var_not_used_in_aexp X a2 ->
+      var_not_used_in_aexp X (AMult a1 a2).
+
+Lemma aeval_weakening : forall i st a ni,
+  var_not_used_in_aexp i a ->
+  aeval (t_update st i ni) a = aeval st a.
+Proof.
+  intros. induction H;
+    try reflexivity;
+    try (simpl;
+    rewrite IHvar_not_used_in_aexp1; rewrite IHvar_not_used_in_aexp2;
+    reflexivity).
+  - simpl. apply t_update_neq. assumption.
+Qed.
+
+Definition subst_equiv_property_weakened := forall i1 i2 a1 a2,
+  var_not_used_in_aexp i1 a1 ->
+  cequiv (i1 ::= a1;; i2 ::= a2)
+         (i1 ::= a1;; i2 ::= subst_aexp i1 a1 a2).
+
+Theorem subst_equiv_weakened : subst_equiv_property_weakened.
+Proof.
+  unfold subst_equiv_property_weakened. intros.
+  apply CSeq_congruence.
+  - apply refl_cequiv.
+  - apply CAss_congruence. induction a2;
+      try (simpl; apply refl_aequiv);
+      try (simpl; unfold aequiv; simpl; intros st;
+           rewrite IHa2_1; rewrite IHa2_2; reflexivity).
+    (* The interesting case is when the aexp to rewrite is
+        an identifier. *)
+    + rename i1 into X. rename i into Y. simpl.
+      remember (beq_id X Y) eqn:IdEqn. destruct b.
+        * (* X == Y *)
+          symmetry in IdEqn.
+          apply beq_id_true_iff in IdEqn.
+          rewrite <- IdEqn.
+          unfold aequiv. intros. admit.
+          (* I cannot for the life of me get this last part figured
+             out, leaving it alone for now. *)
+        * (* X <> Y *) apply refl_aequiv.
+Admitted.
+
+Theorem inequiv_exercise:
+  ~ cequiv (WHILE BTrue DO SKIP END) SKIP.
+Proof.
+  unfold cequiv. intros Contra.
+  assert (H1: (SKIP / empty_state \\ empty_state)) by (apply E_Skip).
+  apply Contra in H1. apply WHILE_true_nonterm in H1.
+  - apply H1.
+  - apply refl_bequiv.
+Qed.
