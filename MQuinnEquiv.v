@@ -868,3 +868,88 @@ Proof.
   - apply H1.
   - apply refl_bequiv.
 Qed.
+
+Module Himp.
+
+Inductive com : Type :=
+  | CSkip : com
+  | CAss : id -> aexp -> com
+  | CSeq : com -> com -> com
+  | CIf : bexp -> com -> com -> com
+  | CWhile : bexp -> com -> com
+  | CHavoc : id -> com. (* <---- new *)
+
+Notation "'SKIP'" :=
+  CSkip.
+Notation "X '::=' a" :=
+  (CAss X a) (at level 60).
+Notation "c1 ;; c2" :=
+  (CSeq c1 c2) (at level 80, right associativity).
+Notation "'WHILE' b 'DO' c 'END'" :=
+  (CWhile b c) (at level 80, right associativity).
+Notation "'IFB' e1 'THEN' e2 'ELSE' e3 'FI'" :=
+  (CIf e1 e2 e3) (at level 80, right associativity).
+Notation "'HAVOC' l" := (CHavoc l) (at level 60).
+
+Reserved Notation "c1 '/' st '\\' st'"
+                  (at level 40, st at level 39).
+Inductive ceval : com -> state -> state -> Prop :=
+  | E_Skip : forall st : state, SKIP / st \\ st
+  | E_Ass : forall (st : state) (a1 : aexp) (n : nat) (X : id),
+      aeval st a1 = n ->
+      (X ::= a1) / st \\ t_update st X n
+  | E_Seq : forall (c1 c2 : com) (st st' st'' : state),
+      c1 / st \\ st' ->
+      c2 / st' \\ st'' ->
+      (c1 ;; c2) / st \\ st''
+  | E_IfTrue : forall (st st' : state) (b1 : bexp) (c1 c2 : com),
+      beval st b1 = true ->
+      c1 / st \\ st' ->
+      (IFB b1 THEN c1 ELSE c2 FI) / st \\ st'
+  | E_IfFalse : forall (st st' : state) (b1 : bexp) (c1 c2 : com),
+      beval st b1 = false ->
+      c2 / st \\ st' ->
+      (IFB b1 THEN c1 ELSE c2 FI) / st \\ st'
+  | E_WhileFalse : forall (b1 : bexp) (st : state) (c1 : com),
+      beval st b1 = false ->
+      (WHILE b1 DO c1 END) / st \\ st
+  | E_WhileTrue : forall (st st' st'' : state) (b1 : bexp) (c1 : com),
+      beval st b1 = true ->
+      c1 / st \\ st' ->
+      (WHILE b1 DO c1 END) / st' \\ st'' ->
+      (WHILE b1 DO c1 END) / st \\ st''
+  | E_Havoc : forall (st : state) (X : id) (n : nat),
+      (HAVOC X) / st \\ t_update st X n
+  where "c1 '/' st '\\' st'" := (ceval c1 st st').
+
+Example havoc_example1 :
+  (HAVOC X) / empty_state \\ t_update empty_state X 0.
+Proof.
+  apply E_Havoc.
+Qed.
+
+Example havoc_example2 :
+  (SKIP;; HAVOC Z) / empty_state \\ t_update empty_state Z 42.
+Proof.
+  apply E_Seq with empty_state.
+  - apply E_Skip.
+  - apply E_Havoc.
+Qed.
+
+Definition cequiv (c1 c2 : com) : Prop := forall st st' : state,
+  c1 / st \\ st' <-> c2 / st \\ st'.
+
+Definition pXY :=
+  HAVOC X;; HAVOC Y.
+
+Definition pYX :=
+  HAVOC Y;; HAVOC X.
+
+(* Skipping the rest of this chapter b/c
+   1) I can't understand how to define equivalency w/ Havoc
+      in the context of nondeterministic commands.
+   2) the rest of the exercises go deeper in this direction and I
+      want to stay broad for now.
+*)
+
+End Himp.
