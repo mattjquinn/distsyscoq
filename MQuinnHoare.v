@@ -193,3 +193,22 @@ Proof.
   - rewrite t_update_shadow. rewrite t_update_eq. rewrite t_update_same.
     reflexivity.
 Qed.
+
+Theorem hoare_asgn_fwd_exists :
+  forall a P,
+  {{ fun st => P st }}
+    X ::= a
+  {{ fun st => exists m, P (t_update st X m) /\
+                st X = aeval (t_update st X m) a }}.
+Proof.
+  intros. unfold hoare_triple. intros st st' Hcom H1.
+  remember (st X) as m'. exists m'.
+  (* Note that everything after and including this split is identical to
+     to the steps in hoare_asgn_fwd above; ideally should apply that
+     theorem directly or extract those steps as a lemma here. *)
+  split;
+      inversion Hcom; subst.
+  - rewrite t_update_shadow. rewrite t_update_same. apply H1.
+  - rewrite t_update_shadow. rewrite t_update_eq. rewrite t_update_same.
+    reflexivity.
+Qed.
