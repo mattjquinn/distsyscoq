@@ -165,3 +165,31 @@ Example assn_sub_ex2 :
   {{(fun st => 0 <= st X /\ st X <= 5)}}.
 Proof. apply hoare_asgn. Qed.
 
+(*
+   hoare_asgn_wrong
+
+   {{ True }} X ::= a {{ X = a }}
+
+   Proof: by contradiction.
+   Assume a is X + 1 for any value of X.
+    - Our precondition is True and hence satisfied.
+    - Our postcondition is X = X + 1. When the assignment is made,
+      X ::= a brings state st to a st' where X' equals X + 1. The
+      postcondition applies to this state st', and thus can be transformed
+      to X' + 1. X' + 1 <> X + 1, and so this type of forward rule will
+      not work correctly in all instances.
+*)
+
+Theorem hoare_asgn_fwd :
+  forall m a P,
+  {{ fun st => P st /\ st X = m }}
+    X ::= a
+  {{ fun st => P (t_update st X m)
+              /\ st X = aeval (t_update st X m) a }}.
+Proof.
+  intros. unfold hoare_triple. intros st st' Hcom [H1 H2]. split;
+    inversion Hcom; subst.
+  - rewrite t_update_shadow. rewrite t_update_same. apply H1.
+  - rewrite t_update_shadow. rewrite t_update_eq. rewrite t_update_same.
+    reflexivity.
+Qed.
