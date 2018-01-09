@@ -212,3 +212,53 @@ Proof.
   - rewrite t_update_shadow. rewrite t_update_eq. rewrite t_update_same.
     reflexivity.
 Qed.
+
+Theorem hoare_consequence_pre : forall (P P' Q : Assertion) c,
+  {{P'}} c {{Q}} ->
+  P ->> P' ->
+  {{P}} c {{Q}}.
+Proof.
+  unfold assert_implies. unfold hoare_triple. intros.
+  apply H0 in H2. generalize dependent H2. apply H.
+  assumption.
+Qed.
+
+Theorem hoare_consequence_pre_from_book : forall (P P' Q : Assertion) c,
+  {{P'}} c {{Q}} ->
+  P ->> P' ->
+  {{P}} c {{Q}}.
+Proof.
+  intros P P' Q c Hhoare Himp.
+  intros st st' Hc HP. apply (Hhoare st st').
+  assumption. apply Himp. assumption.
+Qed.
+
+Theorem hoare_consequence_post : forall (P Q Q' : Assertion) c,
+  {{P}} c {{Q'}} ->
+  Q' ->> Q ->
+  {{P}} c {{Q}}.
+Proof.
+  intros P Q Q' c Hhoare Himp st st' Hc HP.
+  apply Himp. apply (Hhoare st st'); assumption.
+Qed.
+
+Example hoare_asgn_example1 :
+  {{fun st => True}} (X ::= (ANum 1)) {{fun st => st X = 1}}.
+Proof.
+  apply hoare_consequence_pre
+    with (P' := (fun st => st X = 1) [X |-> ANum 1]).
+  apply hoare_asgn. intros st H.
+  unfold assn_sub. unfold t_update. reflexivity.
+Qed.
+
+Theorem hoare_consequence : forall (P P' Q Q' : Assertion) c,
+  {{P'}} c {{Q'}} ->
+  P ->> P' ->
+  Q' ->> Q ->
+  {{P}} c {{Q}}.
+Proof.
+  intros P P' Q Q' c Hhoare HPimp HQimp.
+  apply (hoare_consequence_pre P P' Q).
+  apply (hoare_consequence_post P' Q Q').
+  apply Hhoare. apply HQimp. apply HPimp.
+Qed.
