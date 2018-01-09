@@ -308,3 +308,21 @@ Proof.
   intros P Q HP HQ. destruct HP as [y HP']. eapply HQ.
   eassumption.
 Qed.
+
+Theorem assn_sub_ex1' : 
+  {{ fun st => st X + 1 <= 5 }} 
+  (X ::= (APlus (AId X) (ANum 1)))
+  {{ fun st => st X <= 5 }}.
+Proof.
+  eapply hoare_consequence_pre. apply hoare_asgn.
+  intros st H. eassumption.
+Qed.
+
+Theorem assn_sub_ex2' :
+  {{ fun st => 0 <= 3 /\ 3 <= 5 }}
+  (X ::= (ANum 3))
+  {{ fun st => 0 <= st X /\ st X <= 5 }}.
+Proof.
+  eapply hoare_consequence_pre. apply hoare_asgn.
+  intros st H. eassumption.
+Qed.
