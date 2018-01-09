@@ -326,3 +326,28 @@ Proof.
   eapply hoare_consequence_pre. apply hoare_asgn.
   intros st H. eassumption.
 Qed.
+
+Theorem hoare_skip : forall P, {{P}} SKIP {{P}}.
+Proof. unfold hoare_triple. intros. inversion H. subst. assumption. Qed.
+
+Theorem hoare_seq : forall P Q R c1 c2,
+  {{Q}} c2 {{R}} ->
+  {{P}} c1 {{Q}} ->
+  {{P}} c1;;c2 {{R}}.
+Proof.
+  unfold hoare_triple. intros.
+  inversion H1. subst.
+  eapply H. eassumption.
+  eapply H0. apply H5. assumption.
+Qed.
+
+Example hoare_asgn_example3 : forall a n,
+  {{fun st => aeval st a = n}}
+  (X ::= a;; SKIP)
+  {{fun st => st X = n}}.
+Proof.
+  intros a n. eapply hoare_seq.
+  - apply hoare_skip.
+  - eapply hoare_consequence_pre. apply hoare_asgn.
+    intros st H. subst. reflexivity.
+Qed.
