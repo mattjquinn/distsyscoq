@@ -262,3 +262,49 @@ Proof.
   apply (hoare_consequence_post P' Q Q').
   apply Hhoare. apply HQimp. apply HPimp.
 Qed.
+
+Example hoare_asgn_example1' :
+  {{ fun st => True }}
+  (X ::= (ANum 1))
+  {{ fun st => st X = 1 }}.
+Proof.
+  eapply hoare_consequence_pre.
+  apply hoare_asgn. intros st H. reflexivity.
+Qed.
+
+Lemma silly1 : forall (P : nat -> nat -> Prop) (Q : nat -> Prop),
+  (forall x y : nat, P x y) ->
+  (forall x y : nat, P x y -> Q x) ->
+  Q 42.
+Proof.
+  intros P Q HP HQ. eapply HQ. apply HP.
+Abort.
+
+Lemma silly2 :
+  forall (P : nat -> nat -> Prop) (Q : nat -> Prop),
+  (exists y, P 42 y) ->
+  (forall x y : nat, P x y -> Q x) ->
+  Q 42.
+Proof.
+  intros P Q HP HQ. eapply HQ. destruct HP as [y HP'].
+Abort.
+
+Lemma silly2_fixed :
+  forall (P : nat -> nat -> Prop) (Q : nat -> Prop),
+  (exists y, P 42 y) ->
+  (forall x y : nat, P x y -> Q x) ->
+  Q 42.
+Proof.
+  intros P Q HP HQ. destruct HP as [y HP'].
+  eapply HQ. apply HP'.
+Qed.
+
+Lemma silly2_eassumption :
+  forall (P : nat -> nat -> Prop) (Q : nat -> Prop),
+  (exists y, P 42 y) ->
+  (forall x y : nat, P x y -> Q x) ->
+  Q 42.
+Proof.
+  intros P Q HP HQ. destruct HP as [y HP']. eapply HQ.
+  eassumption.
+Qed.
