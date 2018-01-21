@@ -351,3 +351,14 @@ Proof.
   - eapply hoare_consequence_pre. apply hoare_asgn.
     intros st H. subst. reflexivity.
 Qed.
+
+Example hoare_asgn_example_4 : 
+  {{fun st => True}} (X ::= (ANum 1);; Y ::= (ANum 2))
+  {{fun st => st X = 1 /\ st Y = 2}}.
+Proof.
+  eapply hoare_seq.
+  - apply hoare_asgn.
+  - eapply hoare_consequence_pre.
+    + apply hoare_asgn.
+    + intros st H. unfold assn_sub. split; reflexivity.
+Qed.
