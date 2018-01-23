@@ -362,3 +362,58 @@ Proof.
     + apply hoare_asgn.
     + intros st H. unfold assn_sub. split; reflexivity.
 Qed.
+
+Definition swap_program : com :=
+  Z ::= AId X ;;
+  X ::= AId Y ;;
+  Y ::= AId Z.
+
+Theorem swap_exercise :
+  {{fun st => st X <= st Y}}
+  swap_program
+  {{fun st => st Y <= st X}}.
+Proof.
+  eapply hoare_seq.
+  - eapply hoare_seq; apply hoare_asgn.
+  - eapply hoare_consequence_pre.
+    + apply hoare_asgn.
+    + intros st H. unfold assn_sub. simpl.
+      unfold t_update. simpl. assumption.
+Qed.
+
+(* Exercise hoarestate1:
+   Explain why the following proposition can't be proven:
+
+      ∀ (a : aexp) (n : nat),
+         {{fun st ⇒ aeval st a = n}}
+         (X ::= (ANum 3);; Y ::= a)
+         {{fun st ⇒ st Y = n}}.
+
+   Answer: Because a could be an aexp involving X; assigning
+   3 to X may cause a to still equal n, or it may not. Without
+   knowing more about a, we can't prove one direction or the other.
+*)
+
+Definition bassn b : Assertion :=
+  fun st => (beval st b = true).
+
+Lemma bexp_eval_true : forall b st,
+  beval st b = true -> (bassn b) st.
+Proof.
+  intros. unfold bassn. assumption.
+Qed.
+
+Lemma bexp_eval_false : forall b st,
+  beval st b = false -> ~ ((bassn b) st).
+Proof.
+  intros b st Hbe Hcontra.
+  unfold bassn in Hcontra.
+  rewrite -> Hcontra in Hbe. inversion Hbe.
+Qed.
+
+Theorem hoare_if : forall P Q b c1 c2,
+  {{fun st => P st /\ bassn b st}} c1 {{Q}} ->
+  {{fun st => P st /\ ~(bassn b st)}} c2 {{Q}} ->
+  {{P}} (IFB b THEN c1 ELSE c2 FI) {{Q}}.
+Proof.
+  intros P Q b c1 c2 Hif Helse.
