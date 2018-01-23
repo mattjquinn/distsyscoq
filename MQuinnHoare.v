@@ -416,4 +416,28 @@ Theorem hoare_if : forall P Q b c1 c2,
   {{fun st => P st /\ ~(bassn b st)}} c2 {{Q}} ->
   {{P}} (IFB b THEN c1 ELSE c2 FI) {{Q}}.
 Proof.
-  intros P Q b c1 c2 Hif Helse.
+  intros P Q b c1 c2 Hif Helse st st' Hcom HP.
+  inversion Hcom; subst.
+  - apply (Hif st st'); try split; assumption.
+  - apply (Helse st st').
+    + assumption.
+    + split. assumption.
+      apply bexp_eval_false. assumption.
+Qed.
+
+Theorem if_minus_plus :
+  {{ fun st => True }}
+  IFB (BLe (AId X) (AId Y))
+    THEN (Z ::= AMinus (AId Y) (AId X))
+    ELSE (Y ::= APlus (AId X) (AId Z))
+  FI
+  {{fun st => st Y = st X + st Z}}.
+Proof.
+  apply hoare_if.
+  - intros st st' H1 [_ H2]. inversion H1. subst. simpl.
+    unfold t_update. simpl. rewrite Nat.add_sub_assoc.
+    + omega.
+    + inversion H2. apply leb_complete in H0. assumption.
+  - intros st st' H1 [_ H2]. inversion H1. subst. simpl.
+    unfold t_update. simpl. reflexivity.
+Qed.
