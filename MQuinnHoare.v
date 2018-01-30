@@ -521,10 +521,11 @@ Qed.
 Lemma not_bassn_bnot__bassn : forall b st,
   ~ bassn (BNot b) st -> bassn b st.
 Proof.
-  unfold not. unfold bassn. intros b st H1.
-  simpl in H1. destruct (beval st b).
+  unfold not. unfold bassn. simpl. intros b st H.
+  destruct (beval st b); simpl in H.
   - reflexivity.
-  - exfalso. apply H1. reflexivity.
+  - exfalso. apply H. reflexivity.
+    (* OR: contradict H. reflexivity. *)
 Qed.
 
 Lemma hoare_if1_good :
@@ -546,3 +547,35 @@ Proof.
 Qed.
 
 End If1.
+
+Lemma hoare_while : forall P b c,
+  {{fun st => P st /\ bassn b st}} c {{P}} ->
+  {{P}} WHILE b DO c END {{fun st => P st /\ ~ (bassn b st)}}.
+Proof.
+  intros P b c Hhoare st st' He HP.
+  remember (WHILE b DO c END) as wcom eqn:Heqwcom.
+  induction He; try inversion Heqwcom; subst; clear Heqwcom.
+  - split. assumption. apply bexp_eval_false. assumption.
+  - apply IHHe2; try reflexivity.
+    apply (Hhoare st st'). assumption. split. assumption.
+    apply bexp_eval_true. assumption.
+Qed.
+
+Example while_example :
+    {{fun st => st X <= 3}}
+  WHILE (BLe (AId X) (ANum 2))
+  DO X ::= APlus (AId X) (ANum 1) END
+    {{fun st => st X = 3}}.
+Proof.
+  eapply hoare_consequence_post.
+  apply hoare_while.
+  eapply hoare_consequence_pre.
+  apply hoare_asgn.
+  - unfold bassn. unfold assn_sub. unfold assert_implies.
+    unfold t_update. simpl. intros st [H1 H2]. apply leb_complete in H2.
+    omega.
+  - simpl. unfold bassn. unfold assert_implies. intros st [HLe Hb].
+    simpl in Hb. destruct (leb (st X) 2) eqn : Heqle.
+    + exfalso. apply Hb. reflexivity.
+    + apply leb_iff_conv in Heqle. omega.
+Qed.
