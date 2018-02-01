@@ -579,3 +579,18 @@ Proof.
     + exfalso. apply Hb. reflexivity.
     + apply leb_iff_conv in Heqle. omega.
 Qed.
+
+Theorem always_loop_hoare : forall P Q,
+  {{P}} WHILE BTrue DO SKIP END {{Q}}.
+Proof.
+  intros.
+  apply hoare_consequence_pre with (P' := fun st : state => True).
+  eapply hoare_consequence_post.
+  apply hoare_while.
+  - (* Loop body preserves invariant *)
+    apply hoare_post_true. intros st. apply I.
+  - (* Loop invariant and negated guard imply postcondition *)
+    simpl. intros st [Hinv Hguard]. contradict Hguard. reflexivity.
+  - (* Precondition implies invariant *)
+    intros st H. constructor.
+Qed.
