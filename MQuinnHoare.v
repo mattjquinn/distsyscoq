@@ -594,3 +594,90 @@ Proof.
   - (* Precondition implies invariant *)
     intros st H. constructor.
 Qed.
+
+Module RepeatExercise.
+
+Inductive com : Type :=
+  | CSkip : com
+  | CAsgn : id -> aexp -> com
+  | CSeq : com -> com -> com
+  | CIf : bexp -> com -> com -> com
+  | CWhile : bexp -> com -> com
+  | CRepeat : com -> bexp -> com.
+
+Notation "'SKIP'" :=
+  CSkip.
+Notation "c1 ;; c2" :=
+  (CSeq c1 c2) (at level 80, right associativity).
+Notation "X '::=' a" :=
+  (CAsgn X a) (at level 60).
+Notation "'WHILE' b 'DO' c 'END'" :=
+  (CWhile b c) (at level 80, right associativity).
+Notation "'IFB' e1 'THEN' e2 'ELSE' e3 'FI'" :=
+  (CIf e1 e2 e3) (at level 80, right associativity).
+Notation "'REPEAT' e1 'UNTIL' b2 'END'" :=
+  (CRepeat e1 b2) (at level 80, right associativity).
+
+Inductive ceval : state -> com -> state -> Prop :=
+  | E_Skip : forall st,
+      ceval st SKIP st
+  | E_Ass : forall st a1 n X,
+      aeval st a1 = n ->
+      ceval st (X ::= a1) (t_update st X n)
+  | E_Seq : forall c1 c2 st st' st'',
+      ceval st c1 st' ->
+      ceval st' c2 st'' ->
+      ceval st (c1 ;; c2) st''
+  | E_IfTrue : forall st st' b1 c1 c2,
+      beval st b1 = true ->
+      ceval st c1 st' ->
+      ceval st (IFB b1 THEN c1 ELSE c2 FI) st'
+  | E_IfFalse : forall st st' b1 c1 c2,
+      beval st b1 = false ->
+      ceval st c2 st' ->
+      ceval st (IFB b1 THEN c1 ELSE c2 FI) st'
+  | E_WhileFalse : forall b1 st c1,
+      beval st b1 = false ->
+      ceval st (WHILE b1 DO c1 END) st
+  | E_WhileTrue : forall st st' st'' b1 c1,
+      beval st b1 = true ->
+      ceval st c1 st' ->
+      ceval st' (WHILE b1 DO c1 END) st'' ->
+      ceval st (WHILE b1 DO c1 END) st''
+  | E_RepeatInitial : forall st st' st'' b c,
+      ceval st c st' ->
+      ceval st' (REPEAT c UNTIL b END) st'' ->
+      ceval st (REPEAT c UNTIL b END) st''
+  | E_RepeatContinue : forall st st' st'' b c,
+      beval st b = false ->
+      ceval st c st' ->
+      ceval st' (REPEAT c UNTIL b END) st'' ->
+      ceval st (REPEAT c UNTIL b END) st
+  | E_RepeatEnd : forall st b c,
+      beval st b = true ->
+      ceval st (REPEAT c UNTIL b END) st.
+
+Notation "c1 '/' st '\\' st'" := (ceval st c1 st')
+                                 (at level 40, st at level 39).
+Definition hoare_triple (P:Assertion) (c:com) (Q:Assertion)
+                        : Prop :=
+  forall st st', (c / st \\ st') -> P st -> Q st'.
+Notation "{{ P }} c {{ Q }}" :=
+  (hoare_triple P c Q) (at level 90, c at next level).
+
+
+Definition ex1_repeat :=
+  REPEAT
+    X ::= ANum 1;;
+    Y ::= APlus (AId Y) (ANum 1)
+  UNTIL (BEq (AId X) (ANum 1)) END.
+
+Theorem ex1_repeat_works :
+  ex1_repeat / empty_state \\
+               t_update (t_update empty_state X 1) Y 1.
+Proof.
+  unfold ex1_repeat. apply E_RepeatInitial
+    with (st' := (t_update (t_update empty_state X 1) Y 1)).
+  - apply E_Seq with (t_update empty_state X 1); apply E_Ass; reflexivity.
+  - apply E_RepeatEnd. reflexivity.
+Qed.
