@@ -1,0 +1,102 @@
+We are are hiring again! 3 open positions for proof engineers in Sydney.
+
+Cheers,
+June
+
+
+Data61 Seeking Proof Engineers
+==============================
+
+If only there were a place where I could prove theorems for money, change the
+world, and have fun while doing it...
+
+Sounds too good to exist?
+
+In the Trustworthy Systems team at Data61 that's what we do for a living. We
+are the creators of seL4, the world's first fully formally verified operating
+system kernel with extreme performance and strong security & correctness
+proofs. Our highly international team is located on the UNSW campus, close to
+the beautiful beaches of sunny Sydney, Australia, one of the world's most
+liveable cities.
+
+We are looking for 3 motivated proof engineers who want to join our team in Sydney,
+move things forward, and have global impact. We are expanding our team,
+because seL4 is going places. There are active projects around the world in
+
+ - Automotive - because cars have been hacked enough
+ - Aviation - for more security and safety for autonomous vehicles
+ - Defence - protecting confidential information
+ - Connected consumer devices - with security built in from the start
+ - Spaceflight - because awesome
+
+To make these projects successful, we need to scale formal verification.
+You would
+
+ - work on industrial-scale formal proofs in Isabelle/HOL
+ - develop formally verified infrastructure for building secure systems
+   on top of seL4
+ - contribute to improved proof automation and better reasoning techniques
+ - apply formal proof to real-world systems and tools
+
+To apply for this position, you should possess a significant subset of the
+following skills.
+
+ - functional programming in a language like Haskell, ML, or OCaml
+ - first-order or higher-order formal logic
+ - basic experience in C
+ - ability and desire to quickly learn new techniques
+ - undergraduate degree in Computer Science, Mathematics, or similar
+ - ability and desire to work in a larger team
+
+We are hiring at two levels, so if you are more qualified or experienced than
+the above would suggest, you can come in as a senior proof engineer.
+
+If you additionally have experience
+
+ - in software verification with an interactive theorem prover such as
+   Isabelle/HOL, HOL4, or Coq, and/or
+ - with operating systems and microkernels
+
+you should definitely apply!
+
+If you have the right skills and background, we can provide training on the
+job. Continual learning is a central component of everything we do. You will
+work with a unique world-leading combination of OS and formal methods
+experts, students at undergraduate and PhD level, engineers, and researchers
+from 5 continents, speaking over 15 languages. Trustworthy Systems is a fun,
+creative, and welcoming workplace with flexible hours & work arrangements.
+
+We value diversity in all forms and welcome applications from people of all
+ages, including people with disabilities, and those who identify as LGBTIQ.
+See https://ts.data61.csiro.au/diversity/ for more information.
+
+Salary ranges for this position, in AUD (plus superannuation):
+- Junior: 80-91K
+- Senior: 95-103K
+depending on experience and qualifications.
+
+Apply online at the following links:
+- https://jobs.csiro.au/job/Sydney%2C-NSW-Proof-Engineer/464792900/
+- https://jobs.csiro.au/job/Sydney%2C-NSW-Senior-Proof-Engineer/464792300/
+
+Your application should include a cover letter, CV, undergraduate transcript
+(if applicable), and contact information for two references.
+
+This round of applications closes 15 April 2018.
+
+The seL4 code and proof are open source. Check them out at https://seL4.systems
+
+More information about Data61's Trustworthy Systems team at
+https://ts.data61.csiro.au
+
+Still studying? We also have internship opportunities!
+https://ts.data61.csiro.au/students/
+
+
+--
+Dr June Andronick
+Group Leader and Principal Researcher | Trustworthy Systems | DATA61, CSIRO
+Associate Professor | CSE | UNSW
+june.andronick@data61.csiro.au<mailto:june.andronick@data61.csiro.au> |  +61 2 9490 5881
+http://ts.data61.csiro.au/people/?cn=June+Andronick
+

@@ -1,0 +1,72 @@
+Formal Methods for Aerospace: https://arxiv.org/html/1003.5363
+
+FPGAs being used increasingly in aerospace and defense applications...
+
+http://www.kestrel.edu/
+
+(Only tangentially related: https://www.edukera.com/ offers a web-based interface
+   to formal theorem proving learning; may be useful one day, can't think of a use now.)
+
+Stochastic Reachability Analysis : https://www.amazon.com/Stochastic-Reachability-Analysis-Communications-Engineering-ebook/dp/B00A9YGGQY/
+  - and: http://control.ee.ethz.ch/~reach/research.php
+
+
+"We are seeking postdoctoral researchers to work in a small, agile team at NASA Ames Research Park in Silicon Valley on the multi-year QUASAR project (Quantifiable Assurance Cases for Trusted Autonomy), part of the US Defense Advanced Research Projects Agency (DARPA) Assured Autonomy research program. The successful candidates will undertake fundamental research into the foundations of ‘Dynamic Assurance Cases’ (DACs), which aim to provide quantified assurance of trustworthiness in the design and operation of learning-enabled autonomous systems."
+  - Position located at Moffet Field
+
+
+
+
+
+
+https://www.sifive.com/
+
+GOOD RESOURCE: https://www.disgruntledcode.com
+ - For Coq info
+ - AND for developments (this person has proved various aspects of the Enigma machine)
+
+
+VLab at UCSB
+Prosecco at INRIA: http://prosecco.gforge.inria.fr/
+ProVerif / CryptoVerif for cryptography
+
+
+
+
+****** EXAMPLES OF ALGOS/THINGS PROVED IN COQ: https://www.irif.fr/~sozeau/research/coq.en.html
+
+Interesting (but code no longer available) : http://matej-kosik.net/doc/coq/coq-trunk-proof-tree/index.html
+
+
+Software for intersections supporting self-driving cars:
+ https://www.nytimes.com/interactive/2017/11/08/magazine/tech-design-autonomous-future-cars-100-percent-augmented-reality-policing.html
+
+
+Primary <-> Backup
+
+P increments counter
+P sends counter to B via single bidirectional FIFO channel
+B receives counter via channel
+B increments counter
+
+Safety Property:
+- Backup counter never exceeds Primary's
+
+PROOF STEPS
+-> Definitions
+-> Define step-relation
+-> Examples of traces with step-relation
+   applied to show end result
+-> Proof that safety property holds for
+   any nodes P and B
+
+
+ONCE BASICS WORK:
+
+Step-relation on channel
+-> no change
+-> drops packet
+-> reorders packets (removes FIFO constraint)
+
+WHICH REQUIRES
+-> sequence number on packets to prevent outdated packets from being read

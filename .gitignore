@@ -3,4 +3,13 @@
 *.aux
 *.swp
 *.v#
-SoftwareFoundations_BenjaminPierce
+*.d
+\#*.v\#
+.\#*.v
+*.v~
+*.pyc
+antlrgallinaparser/
+*.class
+*.out
+*.vvp
+*.vcd
