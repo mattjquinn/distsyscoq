@@ -1,0 +1,7 @@
+- Fiat Crypto (name of a project)
+- madiot.fr/coq100
+- In the book Fermat's Enigma: possible things to replicate in Coq:
+  - Appendix 2 details proof that sqrt(2) is irrational
+  - Appendix 6 shows a divide by 0 error
+  - Appendix 10 shows an induction example
+
