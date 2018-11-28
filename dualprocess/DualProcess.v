@@ -44,6 +44,25 @@ Proof.
   - inversion H; omega.
 Qed.
 
+
+Lemma nonempty_list_tail_len {A : Type} : forall (l : list A) ,
+    l <> nil ->
+    (List.length (tl l)) = (List.length l) - 1.
+Proof.
+  intros. induction l.
+  - reflexivity.
+  - simpl. omega.
+Qed.
+
+Lemma nonempty_list_len {A : Type} : forall (l : list A),
+    l <> nil ->
+    List.length l > 0.
+Proof.
+  intros. induction l.
+  - destruct H. reflexivity.
+  - simpl. omega.
+Qed.
+
 Lemma safety2_holds : forall st st' : netstate,
     (netEvalR st st') ->
     (List.length st'.(c1) + List.length st'.(c2) + st'.(t) + st'.(r))  = 10.
@@ -51,8 +70,10 @@ Proof.
   intros. induction H; simpl.
   - reflexivity.
   - omega.
-  - admit. (* For this and next case, must use H0's assumption of nonempty list
-              to show that tail will reduce by 1, canceled out by + 1 in other term. *)
-  - admit.
+  - remember H0 as H1. clear HeqH1.
+    apply nonempty_list_tail_len in H0. apply nonempty_list_len in H1. omega.
+  - remember H0 as H1. clear HeqH1.
+    apply nonempty_list_tail_len in H0. apply nonempty_list_len in H1. omega.
   - omega.
 Qed.
+  
