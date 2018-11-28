@@ -1,0 +1,383 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Round</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library Round</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+Copyright (c) 2018 by Swirlds, Inc.
+   Implemented by Karl Crary.
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Nat.html#"><span class="id" title="library">Nat</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.omega.Omega.html#"><span class="id" title="library">Omega</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Tact.html#"><span class="id" title="library">Tact</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Decide.html#"><span class="id" title="library">Decide</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Majority.html#"><span class="id" title="library">Majority</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Relation.html#"><span class="id" title="library">Relation</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="HashgraphFacts.html#"><span class="id" title="library">HashgraphFacts</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Sees.html#"><span class="id" title="library">Sees</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We differ from the technical report by making the first round 0, instead of 1.
+
+<div class="paragraph"> </div>
+
+   Also, we advance to round n+1 when an event strongly-sees an event in round n
+   on 2/3 of the peers.  This differs from the technical report, which requires
+   that the strongly-seen event be a witness.  The two formulations are equivalent
+   because you can strongly-see a round-n witness on peer a iff you can strongly-see
+   any round-n event on peer a.  Formulating it this way allows us to untangle the
+   circularity between the definitions of round and witness.
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <a name="round"><span class="id" title="inductive">round</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#event"><span class="id" title="axiom">event</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <span class="id" title="keyword">Prop</span> :=<br/>
+| <a name="round_initial"><span class="id" title="constructor">round_initial</span></a> {<span class="id" title="var">x</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#initial"><span class="id" title="definition">initial</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> 0 <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+<br/>
+| <a name="round_nadvance"><span class="id" title="constructor">round_nadvance</span></a> {<span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span> <span class="id" title="var">A</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#parents"><span class="id" title="axiom">parents</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Round.html#z"><span class="id" title="variable">z</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#z"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Majority.html#superminority"><span class="id" title="definition">superminority</span></a> <a class="idref" href="Hashgraph.html#stake"><span class="id" title="axiom">stake</span></a> <a class="idref" href="Round.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="Majority.html#every"><span class="id" title="definition">every</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">(</span></a><span class="id" title="keyword">forall</span> <span class="id" title="var">a</span> <span class="id" title="var">w</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="Round.html#a"><span class="id" title="variable">a</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="Round.html#w"><span class="id" title="variable">w</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Round.html#a"><span class="id" title="variable">a</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Sees.html#stsees"><span class="id" title="definition">stsees</span></a> <a class="idref" href="Round.html#w"><span class="id" title="variable">w</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">i</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <a class="idref" href="Round.html#i"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Nat.html#max"><span class="id" title="definition">max</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#i"><span class="id" title="variable">i</span></a> <a class="idref" href="Round.html#w"><span class="id" title="variable">w</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">)</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Nat.html#max"><span class="id" title="definition">max</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>) <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <br/>
+<br/>
+| <a name="round_advance"><span class="id" title="constructor">round_advance</span></a> {<span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span> <span class="id" title="var">A</span>} :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#parents"><span class="id" title="axiom">parents</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Round.html#z"><span class="id" title="variable">z</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#z"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Majority.html#supermajority"><span class="id" title="definition">supermajority</span></a> <a class="idref" href="Hashgraph.html#stake"><span class="id" title="axiom">stake</span></a> <a class="idref" href="Round.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="Majority.html#every"><span class="id" title="definition">every</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">(</span></a><span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="Round.html#a"><span class="id" title="variable">a</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">w</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="Round.html#w"><span class="id" title="variable">w</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Round.html#a"><span class="id" title="variable">a</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Sees.html#stsees"><span class="id" title="definition">stsees</span></a> <a class="idref" href="Round.html#w"><span class="id" title="variable">w</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Nat.html#max"><span class="id" title="definition">max</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>) <a class="idref" href="Round.html#w"><span class="id" title="variable">w</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">)</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Nat.html#max"><span class="id" title="definition">max</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>)) <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The definition of nonterminating only says that a hashgraph
+   receives events from a round &gt;= n (for all n), but it is a consequence 
+   (all_rounds_inhabited) that it receives events from every round.
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="nonterminating"><span class="id" title="definition">nonterminating</span></a> (<span class="id" title="var">G</span> : <a class="idref" href="Hashgraph.html#world"><span class="id" title="record">world</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">m</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">n</span> <span class="id" title="var">x</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Peano.html#9b077c369e19739ef880736ba34623ff"><span class="id" title="notation">&lt;=</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="Round.html#G"><span class="id" title="variable">G</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Lemma 5.13 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a name="round_fun"><span class="id" title="lemma">round_fun</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>.<br/>
+</div>
+
+<div class="doc">
+initial 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+initial 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+nwitness 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+witness 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+initial 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+nwitness 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+witness 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+initial 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+nwitness 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+witness 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a name="round_mono"><span class="id" title="lemma">round_mono</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#9b9d7b6021a64024f351d001c4555a96"><span class="id" title="notation">@=</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Peano.html#9b077c369e19739ef880736ba34623ff"><span class="id" title="notation">&lt;=</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>.<br/>
+</div>
+
+<div class="doc">
+initial 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a name="round_defined"><span class="id" title="lemma">round_defined</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">n</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="round_decide"><span class="id" title="lemma">round_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">r</span> <span class="id" title="var">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#r"><span class="id" title="variable">r</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="earlier"><span class="id" title="definition">earlier</span></a> (<span class="id" title="var">x</span> <span class="id" title="var">y</span> : <a class="idref" href="Hashgraph.html#event"><span class="id" title="axiom">event</span></a>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">m</span> <span class="id" title="var">n</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Notation</span> <a name="7dad4fc4d44090adca87232b6add52cc"><span class="id" title="notation">&quot;</span></a>x &lt;&lt; y" := (<a class="idref" href="Round.html#earlier"><span class="id" title="definition">earlier</span></a> <span class="id" title="var">x</span> <span class="id" title="var">y</span>)<br/>
+&nbsp;&nbsp;(<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 70, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">event_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="rounds_earlier"><span class="id" title="lemma">rounds_earlier</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Round.html#7dad4fc4d44090adca87232b6add52cc"><span class="id" title="notation">&lt;&lt;</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="earlier_rounds"><span class="id" title="lemma">earlier_rounds</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Round.html#7dad4fc4d44090adca87232b6add52cc"><span class="id" title="notation">&lt;&lt;</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="earlier_trans"><span class="id" title="lemma">earlier_trans</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Round.html#7dad4fc4d44090adca87232b6add52cc"><span class="id" title="notation">&lt;&lt;</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Round.html#7dad4fc4d44090adca87232b6add52cc"><span class="id" title="notation">&lt;&lt;</span></a> <a class="idref" href="Round.html#z"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Round.html#7dad4fc4d44090adca87232b6add52cc"><span class="id" title="notation">&lt;&lt;</span></a> <a class="idref" href="Round.html#z"><span class="id" title="variable">z</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="witness"><span class="id" title="definition">witness</span></a> (<span class="id" title="var">x</span> : <a class="idref" href="Hashgraph.html#event"><span class="id" title="axiom">event</span></a>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#initial"><span class="id" title="definition">initial</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#7a45dffb109c3069e5c675be68643e60"><span class="id" title="notation">\/</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">y</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Round.html#7dad4fc4d44090adca87232b6add52cc"><span class="id" title="notation">&lt;&lt;</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="strict_self_ancestor_witness"><span class="id" title="lemma">strict_self_ancestor_witness</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#witness"><span class="id" title="definition">witness</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#1da0c24969a6f36798c48ba301b1ac20"><span class="id" title="notation">$</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="witness_decide"><span class="id" title="lemma">witness_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="Round.html#witness"><span class="id" title="definition">witness</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="rwitness"><span class="id" title="definition">rwitness</span></a> (<span class="id" title="var">n</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) (<span class="id" title="var">x</span> : <a class="idref" href="Hashgraph.html#event"><span class="id" title="axiom">event</span></a>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#witness"><span class="id" title="definition">witness</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="rwitness_witness"><span class="id" title="lemma">rwitness_witness</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#witness"><span class="id" title="definition">witness</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="rwitness_fun"><span class="id" title="lemma">rwitness_fun</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="rwitness_earlier"><span class="id" title="lemma">rwitness_earlier</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Round.html#7dad4fc4d44090adca87232b6add52cc"><span class="id" title="notation">&lt;&lt;</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="rwitness_decide"><span class="id" title="lemma">rwitness_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">r</span> <span class="id" title="var">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#r"><span class="id" title="variable">r</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>).<br/>
+</div>
+
+<div class="doc">
+Key corollary of the strongly-seeing lemma. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a name="stseen_witness_unique"><span class="id" title="lemma">stseen_witness_unique</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">W</span> <span class="id" title="var">n</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span> <span class="id" title="var">z'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="Round.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="Round.html#z"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="Round.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="Round.html#z'"><span class="id" title="variable">z'</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Sees.html#stsees"><span class="id" title="definition">stsees</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Round.html#z"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Sees.html#stsees"><span class="id" title="definition">stsees</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Round.html#z'"><span class="id" title="variable">z'</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_ancestor_witness"><span class="id" title="lemma">self_ancestor_witness</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">y</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Hashgraph.html#b889f77014901ddbd05cfc3130724d3d"><span class="id" title="notation">$=</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a>.<br/>
+</div>
+
+<div class="doc">
+initial 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a name="stsees_many_witnesses"><span class="id" title="lemma">stsees_many_witnesses</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a>) <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Majority.html#supermajority"><span class="id" title="definition">supermajority</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#stake"><span class="id" title="axiom">stake</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">a</span> =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">w</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="Round.html#w"><span class="id" title="variable">w</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Round.html#a"><span class="id" title="variable">a</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Sees.html#stsees"><span class="id" title="definition">stsees</span></a> <a class="idref" href="Round.html#w"><span class="id" title="variable">w</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#w"><span class="id" title="variable">w</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Majority.html#every"><span class="id" title="definition">every</span></a>.<br/>
+</div>
+
+<div class="doc">
+nwitness 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a name="ancestor_witness"><span class="id" title="lemma">ancestor_witness</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span> <span class="id" title="var">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Peano.html#9b077c369e19739ef880736ba34623ff"><span class="id" title="notation">&lt;=</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#round"><span class="id" title="inductive">round</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">y</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Hashgraph.html#9b9d7b6021a64024f351d001c4555a96"><span class="id" title="notation">@=</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a>.<br/>
+</div>
+
+<div class="doc">
+succ 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+initial 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+nadvance 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+advance 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a name="all_rounds_inhabited"><span class="id" title="lemma">all_rounds_inhabited</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">W</span> <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Round.html#nonterminating"><span class="id" title="definition">nonterminating</span></a> <a class="idref" href="Round.html#W"><span class="id" title="variable">W</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">x</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="Round.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="honest_witness_unique"><span class="id" title="lemma">honest_witness_unique</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">W</span> <span class="id" title="var">n</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="Round.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="Round.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#honest"><span class="id" title="axiom">honest</span></a> (<a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#rwitness"><span class="id" title="definition">rwitness</span></a> <a class="idref" href="Round.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Round.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Round.html#y"><span class="id" title="variable">y</span></a>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>HashgraphFacts</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library HashgraphFacts</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+Copyright (c) 2018 by Swirlds, Inc.
+   Implemented by Karl Crary.
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Bool.Bool.html#"><span class="id" title="library">Bool</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Nat.html#"><span class="id" title="library">Nat</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Lists.List.html#"><span class="id" title="library">List</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.omega.Omega.html#"><span class="id" title="library">Omega</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Decide.html#"><span class="id" title="library">Decide</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Tact.html#"><span class="id" title="library">Tact</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Relation.html#"><span class="id" title="library">Relation</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Weight.html#"><span class="id" title="library">Weight</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Calculate.html#"><span class="id" title="library">Calculate</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Majority.html#"><span class="id" title="library">Majority</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <a class="idref" href="Hashgraph.html#"><span class="id" title="library">Hashgraph</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Peers 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="eq_peer_decide"><span class="id" title="lemma">eq_peer_decide</span></a> : <span class="id" title="keyword">forall</span> (<span class="id" title="var">a</span> <span class="id" title="var">b</span> : <a class="idref" href="Hashgraph.html#peer"><span class="id" title="axiom">peer</span></a>), <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="HashgraphFacts.html#a"><span class="id" title="variable">a</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="HashgraphFacts.html#b"><span class="id" title="variable">b</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="arbitrary_peer"><span class="id" title="lemma">arbitrary_peer</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#inhabited"><span class="id" title="inductive">inhabited</span></a> <a class="idref" href="Hashgraph.html#peer"><span class="id" title="axiom">peer</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="distinct_peer"><span class="id" title="lemma">distinct_peer</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> (<span class="id" title="var">P</span> : <a class="idref" href="Hashgraph.html#peer"><span class="id" title="axiom">peer</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <span class="id" title="keyword">Prop</span>) <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Majority.html#majority"><span class="id" title="definition">majority</span></a> <a class="idref" href="Hashgraph.html#stake"><span class="id" title="axiom">stake</span></a> <a class="idref" href="HashgraphFacts.html#P"><span class="id" title="variable">P</span></a> <a class="idref" href="Majority.html#every"><span class="id" title="definition">every</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">b</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <a class="idref" href="HashgraphFacts.html#P"><span class="id" title="variable">P</span></a> <a class="idref" href="HashgraphFacts.html#b"><span class="id" title="variable">b</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d82a7d96d3659d805ffe732283716822"><span class="id" title="notation">/\</span></a> <a class="idref" href="HashgraphFacts.html#a"><span class="id" title="variable">a</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#32263a1c8b01baecdff9deb038955bc9"><span class="id" title="notation">&lt;&gt;</span></a> <a class="idref" href="HashgraphFacts.html#b"><span class="id" title="variable">b</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="honest_decide"><span class="id" title="lemma">honest_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="Hashgraph.html#honest"><span class="id" title="axiom">honest</span></a> <a class="idref" href="HashgraphFacts.html#a"><span class="id" title="variable">a</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Events 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="eq_event_decide"><span class="id" title="lemma">eq_event_decide</span></a> : <span class="id" title="keyword">forall</span> (<span class="id" title="var">x</span> <span class="id" title="var">y</span> : <a class="idref" href="Hashgraph.html#event"><span class="id" title="axiom">event</span></a>), <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Parents 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="initial_no_parent"><span class="id" title="lemma">initial_no_parent</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="Hashgraph.html#initial"><span class="id" title="definition">initial</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#parent"><span class="id" title="inductive">parent</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#False"><span class="id" title="inductive">False</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="initial_no_self_parent"><span class="id" title="lemma">initial_no_self_parent</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="Hashgraph.html#initial"><span class="id" title="definition">initial</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#False"><span class="id" title="inductive">False</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="parents_self_parent"><span class="id" title="lemma">parents_self_parent</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#parents"><span class="id" title="axiom">parents</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="HashgraphFacts.html#z"><span class="id" title="variable">z</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#z"><span class="id" title="variable">z</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="parent_decide"><span class="id" title="lemma">parent_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="Hashgraph.html#parent"><span class="id" title="inductive">parent</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="parent_finite"><span class="id" title="lemma">parent_finite</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <a class="idref" href="Decide.html#finite"><span class="id" title="definition">finite</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">y</span> =&gt; <a class="idref" href="Hashgraph.html#parent"><span class="id" title="inductive">parent</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_parent_impl_parent"><span class="id" title="lemma">self_parent_impl_parent</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#parent"><span class="id" title="inductive">parent</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_parent_fun"><span class="id" title="lemma">self_parent_fun</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">x'</span> <span class="id" title="var">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a> <a class="idref" href="HashgraphFacts.html#x'"><span class="id" title="variable">x'</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="HashgraphFacts.html#x'"><span class="id" title="variable">x'</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_parent_creator"><span class="id" title="lemma">self_parent_creator</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_parent_decide"><span class="id" title="lemma">self_parent_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Paths 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_ancestor_impl_ancestor"><span class="id" title="lemma">self_ancestor_impl_ancestor</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#b889f77014901ddbd05cfc3130724d3d"><span class="id" title="notation">$=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#9b9d7b6021a64024f351d001c4555a96"><span class="id" title="notation">@=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="strict_self_ancestor_impl_strict_ancestor"><span class="id" title="lemma">strict_self_ancestor_impl_strict_ancestor</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#1da0c24969a6f36798c48ba301b1ac20"><span class="id" title="notation">$</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#97b411def4c6ff7e2a58aee4ceea4746"><span class="id" title="notation">@</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_parent_well_founded"><span class="id" title="lemma">self_parent_well_founded</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Wf.html#well_founded"><span class="id" title="definition">well_founded</span></a> <a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="strict_ancestor_well_founded"><span class="id" title="lemma">strict_ancestor_well_founded</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Wf.html#well_founded"><span class="id" title="definition">well_founded</span></a> <a class="idref" href="Hashgraph.html#strict_ancestor"><span class="id" title="definition">strict_ancestor</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="strict_ancestor_parents"><span class="id" title="lemma">strict_ancestor_parents</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">w</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#parents"><span class="id" title="axiom">parents</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="HashgraphFacts.html#z"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#w"><span class="id" title="variable">w</span></a> <a class="idref" href="Hashgraph.html#97b411def4c6ff7e2a58aee4ceea4746"><span class="id" title="notation">@</span></a> <a class="idref" href="HashgraphFacts.html#z"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#w"><span class="id" title="variable">w</span></a> <a class="idref" href="Hashgraph.html#9b9d7b6021a64024f351d001c4555a96"><span class="id" title="notation">@=</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#7a45dffb109c3069e5c675be68643e60"><span class="id" title="notation">\/</span></a> <a class="idref" href="HashgraphFacts.html#w"><span class="id" title="variable">w</span></a> <a class="idref" href="Hashgraph.html#9b9d7b6021a64024f351d001c4555a96"><span class="id" title="notation">@=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="strict_self_ancestor_parent"><span class="id" title="lemma">strict_self_ancestor_parent</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#self_parent"><span class="id" title="definition">self_parent</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="HashgraphFacts.html#z"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#1da0c24969a6f36798c48ba301b1ac20"><span class="id" title="notation">$</span></a> <a class="idref" href="HashgraphFacts.html#z"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#b889f77014901ddbd05cfc3130724d3d"><span class="id" title="notation">$=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="strict_ancestor_initial"><span class="id" title="lemma">strict_ancestor_initial</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#97b411def4c6ff7e2a58aee4ceea4746"><span class="id" title="notation">@</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#initial"><span class="id" title="definition">initial</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#False"><span class="id" title="inductive">False</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="ancestor_initial"><span class="id" title="lemma">ancestor_initial</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#9b9d7b6021a64024f351d001c4555a96"><span class="id" title="notation">@=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#initial"><span class="id" title="definition">initial</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_ancestor_creator"><span class="id" title="lemma">self_ancestor_creator</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#b889f77014901ddbd05cfc3130724d3d"><span class="id" title="notation">$=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>.<br/>
+</div>
+
+<div class="doc">
+step 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a name="strict_ancestor_irreflex"><span class="id" title="lemma">strict_ancestor_irreflex</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#97b411def4c6ff7e2a58aee4ceea4746"><span class="id" title="notation">@</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#False"><span class="id" title="inductive">False</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Path decisions 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="strict_ancestor_finite"><span class="id" title="lemma">strict_ancestor_finite</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <a class="idref" href="Decide.html#finite"><span class="id" title="definition">finite</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">y</span> =&gt; <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Hashgraph.html#97b411def4c6ff7e2a58aee4ceea4746"><span class="id" title="notation">@</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a>).<br/>
+<span class="id" title="keyword">Lemma</span> <a name="ancestor_finite"><span class="id" title="lemma">ancestor_finite</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <a class="idref" href="Decide.html#finite"><span class="id" title="definition">finite</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">y</span> =&gt; <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Hashgraph.html#9b9d7b6021a64024f351d001c4555a96"><span class="id" title="notation">@=</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a>).<br/>
+<span class="id" title="keyword">Lemma</span> <a name="ancestor_decide"><span class="id" title="lemma">ancestor_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#9b9d7b6021a64024f351d001c4555a96"><span class="id" title="notation">@=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="strict_ancestor_decide"><span class="id" title="lemma">strict_ancestor_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#97b411def4c6ff7e2a58aee4ceea4746"><span class="id" title="notation">@</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_ancestor_decide"><span class="id" title="lemma">self_ancestor_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#b889f77014901ddbd05cfc3130724d3d"><span class="id" title="notation">$=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_ancestor_total"><span class="id" title="lemma">self_ancestor_total</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">W</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="HashgraphFacts.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="HashgraphFacts.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#honest"><span class="id" title="axiom">honest</span></a> (<a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#b889f77014901ddbd05cfc3130724d3d"><span class="id" title="notation">$=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#7a45dffb109c3069e5c675be68643e60"><span class="id" title="notation">\/</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Hashgraph.html#b889f77014901ddbd05cfc3130724d3d"><span class="id" title="notation">$=</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="self_ancestor_total'"><span class="id" title="lemma">self_ancestor_total'</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">W</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="HashgraphFacts.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="HashgraphFacts.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#honest"><span class="id" title="axiom">honest</span></a> (<a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="Hashgraph.html#b889f77014901ddbd05cfc3130724d3d"><span class="id" title="notation">$=</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#7a45dffb109c3069e5c675be68643e60"><span class="id" title="notation">\/</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="Hashgraph.html#1da0c24969a6f36798c48ba301b1ac20"><span class="id" title="notation">$</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Forks 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="fork_symm"><span class="id" title="lemma">fork_symm</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="Hashgraph.html#fork"><span class="id" title="definition">fork</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#fork"><span class="id" title="definition">fork</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="fork_creator"><span class="id" title="lemma">fork_creator</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="Hashgraph.html#fork"><span class="id" title="definition">fork</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashgraph.html#creator"><span class="id" title="axiom">creator</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="fork_decide"><span class="id" title="lemma">fork_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="Hashgraph.html#fork"><span class="id" title="definition">fork</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Worlds 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="realtime_before"><span class="id" title="definition">realtime_before</span></a> (<span class="id" title="var">s</span> : <a class="idref" href="Hashgraph.html#sample"><span class="id" title="axiom">sample</span></a>) (<span class="id" title="var">x</span> : <a class="idref" href="Hashgraph.html#event"><span class="id" title="axiom">event</span></a>) : <a class="idref" href="Hashgraph.html#world"><span class="id" title="record">world</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="event_world"><span class="id" title="lemma">event_world</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">exists</span></a> <span class="id" title="var">W</span><a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <a class="idref" href="Hashgraph.html#member"><span class="id" title="projection">member</span></a> <a class="idref" href="HashgraphFacts.html#W"><span class="id" title="variable">W</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Textorder 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="textorder_decide"><span class="id" title="lemma">textorder_decide</span></a> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Logic.Decidable.html#decidable"><span class="id" title="definition">decidable</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.8.1/stdlib//Coq.Bool.Bool.html#Is_true"><span class="id" title="definition">Is_true</span></a> (<a class="idref" href="Hashgraph.html#textorder"><span class="id" title="axiom">textorder</span></a> <a class="idref" href="HashgraphFacts.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="HashgraphFacts.html#y"><span class="id" title="variable">y</span></a>)).<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

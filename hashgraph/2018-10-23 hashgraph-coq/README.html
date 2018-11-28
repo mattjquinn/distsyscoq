@@ -1,0 +1,122 @@
+<h2> Correctness proof for the Hashgraph Consensus algorithm, formalized in Coq.</h2>
+
+A formalization of <i>The Swirlds Hashgraph Consensus Algorithm: Fair,
+Fast, Byzantine Fault Tolerance</i>, by Leemon Baird.  Formalized in Coq
+by Karl Crary, using some insights arising from an earlier,
+partial formalization by Gregory Malecha and Ryan Wisnesky.
+
+<h2>Build Instructions</h2>
+
+The development is self-contained and should build without
+modification using Coq version 8.8.0.  Just run make.
+
+<h2> Theorems </h2>
+All theorems, lemmas, definitions, and axioms are listed in the <a href="html/index.html">codoq index</a>. 
+
+<h2> Libraries (in dependency order)</h2>
+<center>
+<table border=0>
+
+<tr>
+<td align=center colspan=3 bgcolor=#aaaaaa><a href="html/Timestamp.html">Timestamp</a></td>
+</tr>
+
+<tr>
+<td align=center colspan=3 bgcolor=#aaaaaa><a href="html/Order.html">Order</a></td>
+</tr>
+
+<tr>
+<td align=center rowspan=10 bgcolor=#cccccc><a href="html/Median.html">Median</a></td>
+<td align=center rowspan=10>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td align=center bgcolor=#cccccc><a href="html/Received.html">Received</a></td>
+</tr>
+
+<tr>
+<td align=center bgcolor=#aaaaaa><a href="html/Fairness.html">Fairness</a></td>
+</tr>
+
+<tr>
+<td align=center bgcolor=#aaaaaa><a href="html/Famous.html">Famous</a></td>
+</tr>
+
+<tr>
+<td align=center colspan=3 bgcolor=#cccccc><a href="html/Consensus.html">Consensus</a></td>
+</tr>
+
+<tr>
+<td align=center bgcolor=#aaaaaa><a href="html/Decision.html">Decision</a></td>
+<td align=center rowspan=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td align=center rowspan=2 bgcolor=#cccccc><a href="html/Progress.html">Progress</a></td>
+</tr>
+
+<tr>
+<td align=center bgcolor=#cccccc><a href="html/Vote.html">Vote</a></td>
+</tr>
+
+<tr>
+<td align=center colspan=3 bgcolor=#aaaaaa><a href="html/Round.html">Round</a></td>
+</tr>
+
+<tr>
+<td align=center bgcolor=#cccccc><a href="html/Sees.html">Sees</a></td>
+</tr>
+
+<tr>
+<td align=center bgcolor=#aaaaaa><a href="html/HashgraphFacts.html">HashgraphFacts</a></td>
+</tr>
+
+<tr>
+<td align=center bgcolor=#cccccc><a href="html/Hashgraph.html">Hashgraph</a></td>
+</tr>
+
+<tr>
+<td align=center colspan=3 bgcolor=#aaaaaa><a href="html/Majority.html">Majority</a></td>
+</tr>
+
+<tr>
+<td align=center rowspan=4 bgcolor=#cccccc><a href="html/Calculate.html">Calculate</a></td>
+<td align=center rowspan=4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td align=center bgcolor=#cccccc><a href="html/Cardinality.html">Cardinality</a></td>
+</tr>
+
+<tr>
+<td align=center bgcolor=#aaaaaa><a href="html/Weight.html">Weight</a></td>
+</tr>
+<tr>
+<td align=center bgcolor=#aaaaaa><a href="html/Decide.html">Decide</a></td>
+</tr>
+
+<tr>
+<td align=center bgcolor=#cccccc><a href="html/Relation.html">Relation</a></td>
+</tr>
+
+<tr>
+<td align=center colspan=3 bgcolor=#aaaaaa><a href="html/Tact.html">Tact</a></td>
+</tr>
+
+</table>
+<br>
+
+</center>
+
+<ul>
+<li> <a href="html/Order.html">Order.v</a>: The consensus order. Events from honest peers eventually appear in the order. Once an event is placed in the order, its predecessors are determined permanently.</li>
+<li> <a href="html/Received.html">Received.v</a>: Unique famous witnesses and round received. The round received is defined, immutable, and eventually computable by every peer.</li>
+<li> <a href="html/Famous.html">Famous.v</a>: Famous witnesses exist, and no late-arriving event can be famous.</li>
+<li> <a href="html/Consensus.html">Consensus.v</a>: Consensus is eventually achieved on the fame of every witness.</li>
+<li> <a href="html/Decision.html">Decision.v</a>: Decisions. Decisions are consistent and propagate everywhere.</li>
+<li> <a href="html/vote.html">Vote.v</a>: Voting. Votes are consistent.</li>
+<li> <a href="html/Progress.html">Progress.v</a>: The algorithm continues to advance in round.</li>
+<li> <a href="html/Round.html">Round.v</a>: Rounds created and witnesses.</li>
+<li> <a href="html/Sees.html">Sees.v</a>: Sees and strongly-sees. The strongly seeing lemma.</li>
+<li> <a href="html/HashgraphFacts.html">HashgraphFacts.v</a>: Basic facts regarding hashgraphs.</li>
+<li> <a href="html/Hashgraph.html">Hashgraph.v</a>: The types and axioms that underlie the Hashgraph algorithm.</li>
+<li> <a href="html/Median.html">Median.v</a>: The definition of median, and lemmas regarding it.</li>
+<li> <a href="html/Majority.html">Majority.v</a>: Majorities and supermajorities of finite sets.</li>
+<li> <a href="html/Calculate.html">Calculate.v</a>: Useful arithmetic facts.</li>
+<li> <a href="html/Cardinality.html">Cardinality.v</a>: Cardinality of finite sets.</li>
+<li> <a href="html/Decide.html">Decide.v</a>: Definitions and lemmas regarding decidability.</li>
+<li> <a href="html/Relation.html">Relation.v</a>: Definitions and lemmas regarding relations.</li>
+<li> <a href="html/Tact.html">Tact.v</a>: Tactics used by the development.</li>
+</list>
+
