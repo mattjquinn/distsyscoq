@@ -33,11 +33,13 @@ Inductive netEvalR : netstate -> netstate -> Prop :=
     netEvalR st st' ->
     st'.(r) > 0 ->
     (netEvalR st' {| t := st'.(t) ; r := st'.(r) - 1 ;
-                    c1 := st'.(c1) ; c2 := (msg :: st'.(c2)) |}).
+                     c1 := st'.(c1) ; c2 := (msg :: st'.(c2)) |}).
+
+Definition safety1 (st' : netstate) : Prop := st'.(t) >= 0 /\ st'.(r) >= 0.
       
 Lemma safety1_holds: forall st st' : netstate,
          (netEvalR st st') ->
-         st'.(t) >= 0 /\ st'.(r) >= 0.
+         safety1 st'.
 Proof.
   intros st st' H. split.
   - inversion H; omega. 
@@ -63,11 +65,14 @@ Proof.
   - simpl. omega.
 Qed.
 
+Definition safety2 (st' : netstate) : Prop :=
+    (List.length st'.(c1) + List.length st'.(c2) + st'.(t) + st'.(r))  = 10.
+
 Lemma safety2_holds : forall st st' : netstate,
     (netEvalR st st') ->
-    (List.length st'.(c1) + List.length st'.(c2) + st'.(t) + st'.(r))  = 10.
-Proof.
-  intros. induction H; simpl.
+    safety2 st'.
+  Proof.
+  intros. unfold safety2. induction H; simpl.
   - reflexivity.
   - omega.
   - remember H0 as H1. clear HeqH1.
@@ -76,4 +81,10 @@ Proof.
     apply nonempty_list_tail_len in H0. apply nonempty_list_len in H1. omega.
   - omega.
 Qed.
-  
+
+Theorem safety_holds : forall st st' : netstate,
+      (netEvalR st st') -> safety1 st' /\ safety2 st'.
+Proof.
+  intros. split. apply (safety1_holds st st'). assumption.
+  apply (safety2_holds st st'). assumption.
+Qed.
