@@ -1,15 +1,16 @@
 Require Import List.
-Require Import Nat.
 Require Import String.
 Require Import Omega.
+Require Import ZArith.
+Require Import Nat.
 
-Delimit Scope string_scope with string.
 Local Open Scope string_scope.
 Local Open Scope list_scope.
+Local Open Scope Z_scope.
 
 Definition channel : Type := list string.
-Record netstate := NetState {t : nat; r : nat; c1 : channel; c2 : channel}.
 Definition msg : string := " ""Message."" ".
+Record netstate := NetState {t : Z; r : Z; c1 : channel; c2 : channel}.
 Definition initial := {| t := 5 ; r := 5 ; c1 := nil ; c2 := nil |}.
 
 Inductive netEvalR : netstate -> netstate -> Prop :=
@@ -41,12 +42,9 @@ Lemma safety1_holds: forall st st' : netstate,
          (netEvalR st st') ->
          safety1 st'.
 Proof.
-  intros st st' H. split.
-  - inversion H; omega. 
-  - inversion H; omega.
+  intros. split; induction H; simpl; omega.
 Qed.
-
-
+(*
 Lemma nonempty_list_tail_len {A : Type} : forall (l : list A) ,
     l <> nil ->
     (List.length (tl l)) = (List.length l) - 1.
@@ -64,9 +62,15 @@ Proof.
   - destruct H. reflexivity.
   - simpl. omega.
 Qed.
+ *)
+
+(*
+Close Scope Z.
+Local Open Scope nat_scope.
+ *)
 
 Definition safety2 (st' : netstate) : Prop :=
-    (List.length st'.(c1) + List.length st'.(c2) + st'.(t) + st'.(r))  = 10.
+    List.length st'.(c1) + List.length st'.(c2) + st'.(t) + st'.(r) = 10.
 
 Lemma safety2_holds : forall st st' : netstate,
     (netEvalR st st') ->
