@@ -44,46 +44,25 @@ Lemma safety1_holds: forall st st' : netstate,
 Proof.
   intros. split; induction H; simpl; omega.
 Qed.
-(*
-Lemma nonempty_list_tail_len {A : Type} : forall (l : list A) ,
-    l <> nil ->
-    (List.length (tl l)) = (List.length l) - 1.
-Proof.
-  intros. induction l.
-  - reflexivity.
-  - simpl. omega.
-Qed.
-
-Lemma nonempty_list_len {A : Type} : forall (l : list A),
-    l <> nil ->
-    List.length l > 0.
-Proof.
-  intros. induction l.
-  - destruct H. reflexivity.
-  - simpl. omega.
-Qed.
- *)
-
-(*
-Close Scope Z.
-Local Open Scope nat_scope.
- *)
 
 Definition safety2 (st' : netstate) : Prop :=
-    List.length st'.(c1) + List.length st'.(c2) + st'.(t) + st'.(r) = 10.
-
+  (Zlength st'.(c1) + Zlength st'.(c2))
+  + st'.(t) + st'.(r) = 10.
+(* Z.sub_pred_r -> useful *)
 Lemma safety2_holds : forall st st' : netstate,
     (netEvalR st st') ->
     safety2 st'.
   Proof.
   intros. unfold safety2. induction H; simpl.
   - reflexivity.
-  - omega.
-  - remember H0 as H1. clear HeqH1.
-    apply nonempty_list_tail_len in H0. apply nonempty_list_len in H1. omega.
-  - remember H0 as H1. clear HeqH1.
-    apply nonempty_list_tail_len in H0. apply nonempty_list_len in H1. omega.
-  - omega.
+  - rewrite Zlength_cons. omega.
+  - destruct (c2 st').
+    + destruct H0. reflexivity.
+    + simpl. rewrite Zlength_cons in IHnetEvalR. omega.
+  - destruct (c1 st').
+    + destruct H0. reflexivity.
+    + simpl. rewrite Zlength_cons in IHnetEvalR. omega.
+  - rewrite Zlength_cons. omega.
 Qed.
 
 Theorem safety_holds : forall st st' : netstate,
