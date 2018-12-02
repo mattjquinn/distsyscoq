@@ -1,8 +1,4 @@
-Require Import List.
-Require Import String.
-Require Import Omega.
-Require Import ZArith.
-Require Import Nat.
+Require Import List String Omega ZArith.
 
 Local Open Scope string_scope.
 Local Open Scope list_scope.
@@ -42,31 +38,28 @@ Lemma safety1_holds: forall st st' : netstate,
          (netEvalR st st') ->
          safety1 st'.
 Proof.
-  intros. split; induction H; simpl; omega.
+  intros st st' H. split; induction H; simpl; omega.
 Qed.
 
 Definition safety2 (st' : netstate) : Prop :=
-  (Zlength st'.(c1) + Zlength st'.(c2))
-  + st'.(t) + st'.(r) = 10.
+  Zlength st'.(c1) + Zlength st'.(c2) + st'.(t) + st'.(r) = 10.
+
 Lemma safety2_holds : forall st st' : netstate,
     (netEvalR st st') ->
     safety2 st'.
-  Proof.
-  intros. unfold safety2. induction H; simpl.
-  - reflexivity.
-  - rewrite Zlength_cons. omega.
-  - destruct (c2 st').
-    + destruct H0. reflexivity.
-    + simpl. rewrite Zlength_cons in IHnetEvalR. omega.
-  - destruct (c1 st').
-    + destruct H0. reflexivity.
-    + simpl. rewrite Zlength_cons in IHnetEvalR. omega.
-  - rewrite Zlength_cons. omega.
+Proof.
+  intros st st' H. unfold safety2. induction H; simpl;
+    try reflexivity;                           (* Initial state *)
+    try (rewrite Zlength_cons; omega);         (* Steps 1 and 4 *)
+    [destruct (c2 st') | destruct (c1 st')];   (* Steps 2 and 3 *)
+      try contradiction;
+      (simpl; rewrite Zlength_cons in IHnetEvalR; omega).
 Qed.
 
 Theorem safety_holds : forall st st' : netstate,
       (netEvalR st st') -> safety1 st' /\ safety2 st'.
 Proof.
-  intros. split. apply (safety1_holds st st'). assumption.
-  apply (safety2_holds st st'). assumption.
+  intros st st' H. split;
+  [apply (safety1_holds st st') | apply (safety2_holds st st')];
+    assumption.
 Qed.
