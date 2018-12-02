@@ -48,7 +48,6 @@ Qed.
 Definition safety2 (st' : netstate) : Prop :=
   (Zlength st'.(c1) + Zlength st'.(c2))
   + st'.(t) + st'.(r) = 10.
-(* Z.sub_pred_r -> useful *)
 Lemma safety2_holds : forall st st' : netstate,
     (netEvalR st st') ->
     safety2 st'.
