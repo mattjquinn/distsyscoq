@@ -1,9 +1,0 @@
-Formalize semantics of Verilog in Coq. Embed the Verilog syntax within
-Coq a la "The world's best macros assembler." See bitsrep.v in
-https://github.com/maximedenes/coq-amd64/tree/master/src for defining
-bits, words, etc. (and entire repo in general for proofs)
-Follow along with Verilog by Example book.
-
-First step: establish inductive definition of basic
-  Verilog module and "assign" expressions, then
-  inductive relation for execution (which proceeds by clock cycle)
